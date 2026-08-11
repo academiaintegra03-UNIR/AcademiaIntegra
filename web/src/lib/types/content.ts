@@ -1,0 +1,104 @@
+import type { LucideIcon } from "lucide-react";
+
+export interface HeroContent {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+}
+
+export interface TrustItem {
+  icon: LucideIcon;
+  label: string;
+}
+
+export interface NeedCard {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+  programId: string;
+}
+
+export interface DiagnosticStep {
+  n: number;
+  label: string;
+}
+
+export type ProgramLevel =
+  | "Primaria"
+  | "Bachillerato"
+  | "Preparación de exámenes"
+  | "Universidad";
+
+export interface Program {
+  id: string;
+  level: ProgramLevel;
+  name: string;
+  blurb: string;
+  description: string;
+  topics: string[];
+  methodology: string;
+  includes: string[];
+  modality: string;
+  duration: string;
+  tutor: string;
+}
+
+export interface MethodologyPoint {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+}
+
+export interface CountryFaq {
+  q: string;
+  a: string;
+}
+
+export type CountryId = "colombia" | "chile" | "mexico" | "costa_rica";
+
+export interface Country {
+  id: CountryId;
+  name: string;
+  flag: string;
+  exam: string;
+  description: string;
+  audience: string;
+  areas: string[];
+  modality: string;
+  duration: string;
+  simulations: string;
+  tracking: string;
+  plans: string[];
+  faqs: CountryFaq[];
+}
+
+export interface PricingPlan {
+  name: string;
+  tagline: string;
+  price: string;
+  period: string;
+  badge: string | null;
+  features: string[];
+  pendingValidation?: boolean;
+}
+
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
+export type ResourceLevel =
+  | "Primaria"
+  | "Bachillerato"
+  | "Preparación exámenes"
+  | "Universidad"
+  | "Todos";
+
+export interface Resource {
+  id: number;
+  title: string;
+  type: string;
+  level: ResourceLevel;
+  icon: LucideIcon;
+  tag: "Gratis" | "Exclusivo";
+}

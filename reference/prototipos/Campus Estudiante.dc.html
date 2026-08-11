@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  body{margin:0}
+  *{box-sizing:border-box}
+  a{color:#1E5AA8;text-decoration:none}
+  h1,h2,h3{font-family:'Instrument Serif',Georgia,serif;font-weight:400;margin:0}
+</style>
+</helmet>
+
+<div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#F4F6F8;min-height:100vh;display:flex;color:#142A42">
+
+  <!-- SIDEBAR -->
+  <aside style="width:240px;background:#123B73;flex-shrink:0;display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh">
+    <div style="display:flex;align-items:center;gap:10px;padding:0 8px 24px">
+      <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#F2954A,#2FA6A1);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px">Aι</div>
+      <div style="color:#fff;font-weight:700;font-size:14.5px">Campus</div>
+    </div>
+    <nav style="display:flex;flex-direction:column;gap:2px;flex:1">
+      <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="6">
+        <button style="{{ n.style }}" onClick="{{ n.onClick }}"><span>{{ n.icon }}</span><span>{{ n.label }}</span></button>
+      </sc-for>
+    </nav>
+    <div style="border-top:1px solid #2C5486;padding-top:14px;display:flex;align-items:center;gap:10px">
+      <div style="width:34px;height:34px;border-radius:50%;background:#2FA6A1;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">MG</div>
+      <div style="overflow:hidden">
+        <div style="color:#fff;font-size:13px;font-weight:700;white-space:nowrap">Mariana Gómez</div>
+        <div style="color:#8FA9C4;font-size:11.5px">Grado 11° · Bogotá</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main style="flex:1;padding:32px 40px;max-width:1200px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:28px">
+      <div>
+        <h1 style="font-size:28px;color:#123B73">{{ sectionTitle }}</h1>
+        <div style="font-size:13px;color:#5B6B7A">Datos de prueba — panel del estudiante</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="background:#fff;border:1px solid #E4E8EC;border-radius:20px;padding:8px 16px;font-size:13px;color:#5B6B7A">🔔 3 notificaciones</div>
+      </div>
+    </div>
+
+    <!-- INICIO -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+    <div>
+      <div style="background:linear-gradient(135deg,#1E5AA8,#2FA6A1);border-radius:16px;padding:26px 28px;color:#fff;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:20px;font-family:'Instrument Serif',serif;margin-bottom:4px">Hola, Mariana 👋</div>
+          <div style="font-size:13.5px;color:#EAF6F5">Tu próxima clase es <strong>hoy a las 4:00 p.m.</strong> — Álgebra: sistemas de ecuaciones.</div>
+        </div>
+        <button style="background:#fff;color:#1E5AA8;border:none;padding:11px 20px;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0" onClick="{{ () => go('cursos') }}">Ir a mis cursos</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
+        <sc-for list="{{ statCards }}" as="c" hint-placeholder-count="4">
+          <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:18px">
+            <div style="font-size:12.5px;color:#5B6B7A;margin-bottom:6px">{{ c.label }}</div>
+            <div style="font-size:24px;font-weight:800;color:#123B73">{{ c.value }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:20px">
+        <div>
+          <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px;margin-bottom:16px">
+            <h3 style="font-size:17px;color:#123B73;margin-bottom:14px">Mi ruta de aprendizaje</h3>
+            <sc-for list="{{ routeModules }}" as="m" hint-placeholder-count="4">
+              <div style="margin-bottom:14px">
+                <div style="display:flex;justify-content:space-between;font-size:13.5px;font-weight:600;margin-bottom:5px"><span>{{ m.name }}</span><span style="color:#5B6B7A">{{ m.pct }}%</span></div>
+                <div style="height:8px;background:#EEF1F4;border-radius:4px;overflow:hidden"><div style="{{ m.barStyle }}"></div></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px">
+            <h3 style="font-size:17px;color:#123B73;margin-bottom:14px">Próximas entregas</h3>
+            <sc-for list="{{ upcomingTasks }}" as="t" hint-placeholder-count="3">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F0F2F5">
+                <div>
+                  <div style="font-size:13.5px;font-weight:600;color:#142A42">{{ t.name }}</div>
+                  <div style="font-size:12px;color:#5B6B7A">{{ t.course }}</div>
+                </div>
+                <span style="{{ t.badgeStyle }}">{{ t.due }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div>
+          <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px;margin-bottom:16px">
+            <h3 style="font-size:16px;color:#123B73;margin-bottom:12px">Temas</h3>
+            <div style="font-size:12px;color:#2E9E5B;font-weight:700;margin-bottom:6px">Dominados</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">
+              <sc-for list="{{ masteredTopics }}" as="mt" hint-placeholder-count="3"><span style="background:#E4F3EA;color:#1F7A45;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:12px">{{ mt }}</span></sc-for>
+            </div>
+            <div style="font-size:12px;color:#E08A2C;font-weight:700;margin-bottom:6px">Por reforzar</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+              <sc-for list="{{ weakTopics }}" as="wt" hint-placeholder-count="2"><span style="background:#FDF0E0;color:#B5701A;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:12px">{{ wt }}</span></sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px">
+            <h3 style="font-size:16px;color:#123B73;margin-bottom:10px">Mensaje de tu tutor</h3>
+            <div style="font-size:13px;color:#3E4C59;line-height:1.5;background:#F4F6F8;border-radius:10px;padding:12px">"Buen avance en geometría esta semana. Repasemos trigonometría antes del simulacro del viernes."</div>
+            <div style="font-size:11.5px;color:#5B6B7A;margin-top:8px">Prof. Andrés Rojas · hace 1 día</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- MI RUTA -->
+    <sc-if value="{{ isRuta }}">
+    <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:8px">
+      <sc-for list="{{ routeDetail }}" as="m" hint-placeholder-count="6">
+        <div style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-bottom:1px solid #F0F2F5">
+          <div style="{{ m.iconStyle }}">{{ m.iconText }}</div>
+          <div style="flex:1">
+            <div style="font-size:14.5px;font-weight:700;color:#123B73">{{ m.name }}</div>
+            <div style="font-size:12.5px;color:#5B6B7A">{{ m.lessons }} lecciones</div>
+          </div>
+          <span style="{{ m.statusStyle }}">{{ m.status }}</span>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
+
+    <!-- CURSOS -->
+    <sc-if value="{{ isCursos }}">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+      <sc-for list="{{ courses }}" as="c" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px">
+          <div style="font-size:11px;font-weight:700;color:#2FA6A1;text-transform:uppercase;margin-bottom:6px">{{ c.level }}</div>
+          <div style="font-weight:700;font-size:15.5px;color:#123B73;margin-bottom:10px">{{ c.name }}</div>
+          <div style="height:6px;background:#EEF1F4;border-radius:3px;overflow:hidden;margin-bottom:8px"><div style="{{ c.barStyle }}"></div></div>
+          <div style="font-size:12.5px;color:#5B6B7A">{{ c.pct }}% completado</div>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
+
+    <!-- BANCO DE PREGUNTAS -->
+    <sc-if value="{{ isBanco }}">
+    <div>
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+        <sc-for list="{{ bankFilters }}" as="bf" hint-placeholder-count="5">
+          <span style="background:#fff;border:1.5px solid #D7E1EA;color:#3E4C59;font-size:12.5px;font-weight:600;padding:7px 14px;border-radius:16px">{{ bf }}</span>
+        </sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
+        <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:24px">
+          <div style="font-size:12px;color:#5B6B7A;margin-bottom:10px">Pregunta 8 de práctica ilimitada · Álgebra</div>
+          <div style="font-size:16px;font-weight:600;color:#142A42;margin-bottom:18px">Si 3x − 5 = 16, ¿cuál es el valor de x?</div>
+          <sc-for list="{{ sampleOptions }}" as="op" hint-placeholder-count="4">
+            <div style="border:1.5px solid #D7E1EA;border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:14px;cursor:pointer" style-hover="border-color:#1E5AA8;background:#F7FAFD">{{ op }}</div>
+          </sc-for>
+          <button style="background:#1E5AA8;color:#fff;border:none;padding:11px 20px;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit">Confirmar respuesta</button>
+        </div>
+        <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px">
+          <div style="font-size:13px;color:#5B6B7A;margin-bottom:4px">Intentos esta semana</div>
+          <div style="font-size:26px;font-weight:800;color:#123B73;margin-bottom:14px">47</div>
+          <div style="font-size:13px;color:#5B6B7A;margin-bottom:4px">Precisión</div>
+          <div style="font-size:26px;font-weight:800;color:#2E9E5B;margin-bottom:14px">78%</div>
+          <div style="font-size:12.5px;color:#5B6B7A">Tema con más errores: <strong style="color:#B5701A">Factorización</strong></div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- SIMULACROS -->
+    <sc-if value="{{ isSimulacros }}">
+    <div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px">
+        <sc-for list="{{ availableSims }}" as="sm" hint-placeholder-count="3">
+          <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px">
+            <div style="font-weight:700;font-size:15px;color:#123B73;margin-bottom:6px">{{ sm.name }}</div>
+            <div style="font-size:12.5px;color:#5B6B7A;margin-bottom:14px">{{ sm.questions }} preguntas · {{ sm.duration }}</div>
+            <button style="width:100%;background:#2FA6A1;color:#fff;border:none;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Iniciar simulacro</button>
+          </div>
+        </sc-for>
+      </div>
+      <h3 style="font-size:17px;color:#123B73;margin-bottom:12px">Intentos anteriores</h3>
+      <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;overflow:hidden">
+        <sc-for list="{{ pastSims }}" as="ps" hint-placeholder-count="3">
+          <div style="display:flex;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #F0F2F5;font-size:13.5px">
+            <span style="font-weight:600">{{ ps.name }}</span><span style="color:#5B6B7A">{{ ps.date }}</span><span style="{{ ps.scoreStyle }}">{{ ps.score }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- PROGRESO -->
+    <sc-if value="{{ isProgreso }}">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px">
+        <h3 style="font-size:16px;color:#123B73;margin-bottom:16px">Rendimiento por área</h3>
+        <sc-for list="{{ areaPerf }}" as="a" hint-placeholder-count="5">
+          <div style="margin-bottom:12px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>{{ a.name }}</span><span style="color:#5B6B7A">{{ a.pct }}%</span></div>
+            <div style="height:8px;background:#EEF1F4;border-radius:4px;overflow:hidden"><div style="{{ a.barStyle }}"></div></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px">
+        <h3 style="font-size:16px;color:#123B73;margin-bottom:16px">Horas de estudio (últimas 6 semanas)</h3>
+        <div style="display:flex;align-items:flex-end;gap:10px;height:140px">
+          <sc-for list="{{ studyHours }}" as="w" hint-placeholder-count="6">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+              <div style="{{ w.barStyle }}"></div>
+              <div style="font-size:11px;color:#5B6B7A">{{ w.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- TUTOR IA -->
+    <sc-if value="{{ isTutorIA }}">
+    <div style="max-width:680px">
+      <div style="background:#fff;border:1px solid #E4E8EC;border-radius:14px;padding:20px;margin-bottom:16px;min-height:320px;display:flex;flex-direction:column;gap:12px">
+        <div style="align-self:flex-start;background:#EAF0FB;color:#123B73;font-size:13.5px;padding:10px 14px;border-radius:12px;max-width:80%">¡Hola! Soy tu tutor con IA. Vi que tuviste algo de dificultad con factorización. ¿Quieres una pista para el último ejercicio?</div>
+        <div style="align-self:flex-end;background:#1E5AA8;color:#fff;font-size:13.5px;padding:10px 14px;border-radius:12px;max-width:80%">Sí, dame una pista</div>
+        <div style="align-self:flex-start;background:#EAF0FB;color:#123B73;font-size:13.5px;padding:10px 14px;border-radius:12px;max-width:80%">Busca dos números que multiplicados den el término independiente y sumados den el coeficiente del término medio. ¿Puedes intentarlo con esa idea?</div>
+        <div style="font-size:11.5px;color:#B5701A;background:#FDF0E0;border-radius:8px;padding:8px 12px;align-self:flex-start">⚠️ El tutor con IA puede cometer errores. Si tienes dudas, consulta con tu tutor humano.</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <sc-for list="{{ tutorButtons }}" as="tb" hint-placeholder-count="4">
+          <button style="background:#fff;border:1.5px solid #1E5AA8;color:#1E5AA8;padding:9px 14px;border-radius:20px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">{{ tb }}</button>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { section: 'home' };
+  go(section) { this.setState({ section }); }
+
+  navDefs = [
+    { key: 'home', label: 'Inicio', icon: '🏠' }, { key: 'ruta', label: 'Mi ruta', icon: '🧭' },
+    { key: 'cursos', label: 'Mis cursos', icon: '📚' }, { key: 'banco', label: 'Banco de preguntas', icon: '❓' },
+    { key: 'simulacros', label: 'Simulacros', icon: '📝' }, { key: 'progreso', label: 'Progreso', icon: '📊' },
+    { key: 'tutorIA', label: 'Tutor con IA', icon: '🤖' }
+  ];
+  titles = { home: 'Inicio', ruta: 'Mi ruta de aprendizaje', cursos: 'Mis cursos', banco: 'Banco de preguntas', simulacros: 'Simulacros', progreso: 'Mi progreso', tutorIA: 'Tutor con IA' };
+
+  renderVals() {
+    const s = this.state;
+    const navItems = this.navDefs.map(n => ({
+      ...n, onClick: () => this.go(n.key),
+      style: `display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;text-align:left;background:${s.section === n.key ? 'rgba(255,255,255,0.12)' : 'transparent'};color:${s.section === n.key ? '#fff' : '#AFC3D9'}`
+    }));
+
+    const bar = (pct, color) => `height:100%;border-radius:4px;width:${pct}%;background:${color}`;
+
+    return {
+      navItems, sectionTitle: this.titles[s.section],
+      isHome: s.section === 'home', isRuta: s.section === 'ruta', isCursos: s.section === 'cursos',
+      isBanco: s.section === 'banco', isSimulacros: s.section === 'simulacros', isProgreso: s.section === 'progreso', isTutorIA: s.section === 'tutorIA',
+      go: (k) => this.go(k),
+
+      statCards: [
+        { label: 'Avance general', value: '64%' }, { label: 'Horas de estudio (mes)', value: '18h' },
+        { label: 'Simulacros realizados', value: '5' }, { label: 'Precisión banco de preguntas', value: '78%' }
+      ],
+      routeModules: [
+        { name: 'Álgebra básica', pct: 100, barStyle: bar(100, '#2E9E5B') }, { name: 'Geometría', pct: 72, barStyle: bar(72, '#1E5AA8') },
+        { name: 'Trigonometría', pct: 40, barStyle: bar(40, '#F2954A') }, { name: 'Estadística', pct: 10, barStyle: bar(10, '#B9C6D4') }
+      ],
+      upcomingTasks: [
+        { name: 'Taller de factorización', course: 'Álgebra básica', due: 'Vence hoy', badgeStyle: 'background:#FBE7E7;color:#B33A3A;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:10px' },
+        { name: 'Quiz de ángulos', course: 'Geometría', due: 'Vence en 2 días', badgeStyle: 'background:#FDF0E0;color:#B5701A;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:10px' },
+        { name: 'Simulacro corto', course: 'Saber 11', due: 'Vence en 5 días', badgeStyle: 'background:#EAF0FB;color:#1E5AA8;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:10px' }
+      ],
+      masteredTopics: ['Ecuaciones lineales', 'Perímetro y área', 'Proporciones'],
+      weakTopics: ['Factorización', 'Trigonometría'],
+
+      routeDetail: [
+        { name: 'Álgebra básica', lessons: 12, status: 'Completado', iconText: '✓', iconStyle: 'width:36px;height:36px;border-radius:8px;background:#E4F3EA;color:#1F7A45;display:flex;align-items:center;justify-content:center;font-weight:800', statusStyle: 'font-size:12px;font-weight:700;color:#1F7A45;background:#E4F3EA;padding:5px 12px;border-radius:10px' },
+        { name: 'Geometría', lessons: 10, status: 'En curso', iconText: '2', iconStyle: 'width:36px;height:36px;border-radius:8px;background:#EAF0FB;color:#1E5AA8;display:flex;align-items:center;justify-content:center;font-weight:800', statusStyle: 'font-size:12px;font-weight:700;color:#1E5AA8;background:#EAF0FB;padding:5px 12px;border-radius:10px' },
+        { name: 'Trigonometría', lessons: 9, status: 'En curso', iconText: '3', iconStyle: 'width:36px;height:36px;border-radius:8px;background:#EAF0FB;color:#1E5AA8;display:flex;align-items:center;justify-content:center;font-weight:800', statusStyle: 'font-size:12px;font-weight:700;color:#1E5AA8;background:#EAF0FB;padding:5px 12px;border-radius:10px' },
+        { name: 'Estadística', lessons: 8, status: 'Pendiente', iconText: '4', iconStyle: 'width:36px;height:36px;border-radius:8px;background:#F0F2F5;color:#5B6B7A;display:flex;align-items:center;justify-content:center;font-weight:800', statusStyle: 'font-size:12px;font-weight:700;color:#5B6B7A;background:#F0F2F5;padding:5px 12px;border-radius:10px' },
+        { name: 'Preparación Saber 11', lessons: 14, status: 'Pendiente', iconText: '5', iconStyle: 'width:36px;height:36px;border-radius:8px;background:#F0F2F5;color:#5B6B7A;display:flex;align-items:center;justify-content:center;font-weight:800', statusStyle: 'font-size:12px;font-weight:700;color:#5B6B7A;background:#F0F2F5;padding:5px 12px;border-radius:10px' }
+      ],
+      courses: [
+        { name: 'Álgebra básica', level: 'Bachillerato', pct: 100, barStyle: bar(100, '#2E9E5B') },
+        { name: 'Geometría', level: 'Bachillerato', pct: 72, barStyle: bar(72, '#1E5AA8') },
+        { name: 'Trigonometría', level: 'Bachillerato', pct: 40, barStyle: bar(40, '#F2954A') },
+        { name: 'Preparación Saber 11', level: 'Preparación de exámenes', pct: 25, barStyle: bar(25, '#2FA6A1') }
+      ],
+      bankFilters: ['Álgebra', 'Geometría', 'Trigonometría', 'Nivel: Intermedio', 'Saber 11'],
+      sampleOptions: ['A) x = 5', 'B) x = 7', 'C) x = 11', 'D) x = 21'],
+
+      availableSims: [
+        { name: 'Simulacro Saber 11 completo', questions: 60, duration: '3 horas' },
+        { name: 'Simulacro por área: Matemáticas', questions: 20, duration: '45 min' },
+        { name: 'Simulacro corto de práctica', questions: 10, duration: '20 min' }
+      ],
+      pastSims: [
+        { name: 'Simulacro corto de práctica', date: '3 ago 2026', score: '82%', scoreStyle: 'color:#2E9E5B;font-weight:700' },
+        { name: 'Simulacro por área: Matemáticas', date: '27 jul 2026', score: '68%', scoreStyle: 'color:#B5701A;font-weight:700' },
+        { name: 'Simulacro Saber 11 completo', date: '15 jul 2026', score: '71%', scoreStyle: 'color:#1E5AA8;font-weight:700' }
+      ],
+
+      areaPerf: [
+        { name: 'Razonamiento cuantitativo', pct: 78, barStyle: bar(78, '#1E5AA8') }, { name: 'Lectura crítica', pct: 65, barStyle: bar(65, '#2FA6A1') },
+        { name: 'Ciencias naturales', pct: 58, barStyle: bar(58, '#F2954A') }, { name: 'Ciencias sociales', pct: 71, barStyle: bar(71, '#1E5AA8') }, { name: 'Inglés', pct: 84, barStyle: bar(84, '#2E9E5B') }
+      ],
+      studyHours: [3, 5, 4, 6, 2, 5].map((h, i) => ({ label: `S${i + 1}`, barStyle: `width:70%;height:${h * 18}px;background:#2FA6A1;border-radius:4px 4px 0 0` })),
+
+      tutorButtons: ['Dame una pista', 'Explícamelo de otra forma', 'Muéstrame un ejemplo', 'Consultar con mi tutor']
+    };
+  }
+}
+</script>
+</body>
+</html>
