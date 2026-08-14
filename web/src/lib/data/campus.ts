@@ -9,7 +9,6 @@ import type {
   UpcomingTask,
 } from "@/lib/types/panels";
 
-export const studentName = "Mariana Gómez";
 export const studentMeta = "Grado 11° · Bogotá";
 
 export const statCards: Stat[] = [

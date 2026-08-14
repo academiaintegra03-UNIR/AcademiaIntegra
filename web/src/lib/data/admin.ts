@@ -6,7 +6,6 @@ import type {
   AdminPaymentRow,
   AdminProgramRow,
   AdminScheduledReport,
-  AdminUserRow,
   Stat,
   WeekBar,
 } from "@/lib/types/panels";
@@ -32,17 +31,6 @@ export const alerts: AdminAlert[] = [
   { icon: MessageSquare, text: "5 mensajes de foro por moderar", tone: "info" },
   { icon: TrendingDown, text: "3 estudiantes con avance por debajo del 20%", tone: "error" },
   { icon: SendHorizontal, text: "2 reportes quincenales con envío fallido", tone: "error" },
-];
-
-export const roleFilters = ["Todos", "Estudiante", "Acudiente", "Tutor", "Colegio", "Administrador"];
-
-export const users: AdminUserRow[] = [
-  { name: "Mariana Gómez", email: "mariana.g@ejemplo.com", role: "Estudiante", roleTone: "info", status: "Activo", statusTone: "success" },
-  { name: "Luisa Gómez", email: "luisa.g@ejemplo.com", role: "Acudiente", roleTone: "warning", status: "Activo", statusTone: "success" },
-  { name: "Andrés Rojas", email: "andres.rojas@ejemplo.com", role: "Tutor", roleTone: "info", status: "Activo", statusTone: "success" },
-  { name: "Colegio San Rafael", email: "coordinacion@sanrafael.edu", role: "Colegio", roleTone: "warning", status: "Activo", statusTone: "success" },
-  { name: "Sofía Arango", email: "sofia.arango@academiaintegra.co", role: "Administrador", roleTone: "error", status: "Activo", statusTone: "success" },
-  { name: "Juan Pablo Rincón", email: "jp.rincon@ejemplo.com", role: "Estudiante", roleTone: "info", status: "Inactivo", statusTone: "error" },
 ];
 
 export const programsAdmin: AdminProgramRow[] = [

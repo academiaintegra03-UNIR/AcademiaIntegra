@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import type { StatusTone } from "@/components/shared/status-badge";
+import type { Role } from "@/lib/types/session";
 
 export interface Stat {
   label: string;
@@ -140,12 +141,12 @@ export interface AdminAlert {
 }
 
 export interface AdminUserRow {
+  id: string;
   name: string;
   email: string;
-  role: string;
+  role: Role;
+  roleLabel: string;
   roleTone: StatusTone;
-  status: string;
-  statusTone: StatusTone;
 }
 
 export interface AdminProgramRow {

@@ -102,13 +102,15 @@
   --on-primary-subtle: #8fa9c4;
   --on-primary-border: #2c5486;
   --radius: 0.75rem;
-  --sidebar: #123b73;
-  --sidebar-foreground: #d7e4f0;
-  --sidebar-primary: #2fa6a1;
+  /* Dashboard sidebar — light surface (was solid navy), matches the rest of
+     the panel chrome instead of standing out as its own dark block. */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #142a42;
+  --sidebar-primary: #123b73;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 255, 255, 0.12);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #2c5486;
+  --sidebar-accent: #eaf6f5;
+  --sidebar-accent-foreground: #123b73;
+  --sidebar-border: #e4e8ec;
   --sidebar-ring: #2fa6a1;
 }
 

@@ -5,17 +5,20 @@ import { ProgressRow } from "@/components/shared/progress-row";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { getAuthenticatedProfile } from "@/lib/auth/get-profile";
 import {
   masteredTopics,
   routeModules,
   statCards,
-  studentName,
   tutorMessage,
   upcomingTasks,
   weakTopics,
 } from "@/lib/data/campus";
 
-export default function CampusHomePage() {
+export default async function CampusHomePage() {
+  const profile = await getAuthenticatedProfile();
+  const firstName = profile?.nombre.split(" ")[0] ?? "";
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-end gap-2">
@@ -33,7 +36,7 @@ export default function CampusHomePage() {
           }}
         />
         <div className="relative">
-          <div className="mb-1 text-xl font-bold">Hola, {studentName.split(" ")[0]} 👋</div>
+          <div className="mb-1 text-xl font-bold">Hola, {firstName} 👋</div>
           <div className="text-sm text-[#EAF6F5]">
             Tu próxima clase es <strong>hoy a las 4:00 p.m.</strong> — Álgebra: sistemas de ecuaciones.
           </div>

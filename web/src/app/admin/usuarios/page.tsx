@@ -1,54 +1,45 @@
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { NameCell } from "@/components/shared/name-cell";
+import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getAuthenticatedProfile } from "@/lib/auth/get-profile";
+import { roleOptionFor, roleTone } from "@/lib/data/roles";
+import type { AdminUserRow } from "@/lib/types/panels";
 import { CreateUserDialog } from "@/features/admin/create-user-dialog";
-import { roleFilters, users } from "@/lib/data/admin";
+import { UsersTable } from "@/features/admin/users-table";
 
-export default function AdminUsuariosPage() {
+async function getUserRows(): Promise<AdminUserRow[]> {
+  const supabase = await createClient();
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, nombre, role")
+    .order("nombre");
+
+  if (!profiles || profiles.length === 0) return [];
+
+  // `profiles` has no email column — only auth.users does, and only the
+  // admin (service-role) client can read it.
+  const admin = createAdminClient();
+  const { data: authUsers } = await admin.auth.admin.listUsers({ perPage: 1000 });
+  const emailById = new Map(authUsers?.users.map((u) => [u.id, u.email ?? "—"]) ?? []);
+
+  return profiles.map((profile) => ({
+    id: profile.id,
+    name: profile.nombre,
+    email: emailById.get(profile.id) ?? "—",
+    role: profile.role,
+    roleLabel: roleOptionFor(profile.role)?.label ?? profile.role,
+    roleTone: roleTone(profile.role),
+  }));
+}
+
+export default async function AdminUsuariosPage() {
+  const [rows, currentProfile] = await Promise.all([getUserRows(), getAuthenticatedProfile()]);
+
   return (
     <div>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
-          {roleFilters.map((rf) => (
-            <Badge key={rf} variant="outline" className="h-auto px-3 py-1.5 text-xs">
-              {rf}
-            </Badge>
-          ))}
-        </div>
+      <div className="mb-4 flex justify-end">
         <CreateUserDialog />
       </div>
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Correo</TableHead>
-                <TableHead>Rol</TableHead>
-                <TableHead>Estado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.map((u) => (
-                <TableRow key={u.email}>
-                  <TableCell>
-                    <NameCell name={u.name} />
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{u.email}</TableCell>
-                  <TableCell>
-                    <StatusBadge tone={u.roleTone}>{u.role}</StatusBadge>
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge tone={u.statusTone}>{u.status}</StatusBadge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <UsersTable rows={rows} currentUserId={currentProfile?.id ?? ""} />
     </div>
   );
 }

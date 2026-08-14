@@ -18,12 +18,13 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { UserMenu } from "@/components/layout/user-menu";
+import type { Profile } from "@/lib/types/session";
 
 function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export function SiteHeader() {
+export function SiteHeader({ profile }: { profile: Profile | null }) {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
 
@@ -75,7 +76,7 @@ export function SiteHeader() {
         </NavigationMenu>
 
         <div className="ml-auto flex items-center gap-2">
-          <UserMenu />
+          <UserMenu profile={profile} />
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -126,7 +127,7 @@ export function SiteHeader() {
                 </div>
               </nav>
               <div className="mt-auto border-t border-border px-4 pt-4">
-                <UserMenu />
+                <UserMenu profile={profile} />
               </div>
             </SheetContent>
           </Sheet>

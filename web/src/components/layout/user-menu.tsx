@@ -1,10 +1,10 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { LogOut, UserRoundCog } from "lucide-react";
-import { useSession } from "@/lib/session/session-context";
+import { signOut } from "@/lib/auth/actions";
 import { roleOptionFor } from "@/lib/data/roles";
+import type { Profile } from "@/lib/types/session";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -28,13 +28,8 @@ function initials(name: string) {
   );
 }
 
-export function UserMenu() {
-  const { session, isHydrated, logout } = useSession();
-  const router = useRouter();
-
-  if (!isHydrated) return null;
-
-  if (session.role === "visitante") {
+export function UserMenu({ profile }: { profile: Profile | null }) {
+  if (!profile) {
     return (
       <div className="flex items-center gap-2">
         <Button variant="ghost" asChild>
@@ -47,7 +42,7 @@ export function UserMenu() {
     );
   }
 
-  const option = roleOptionFor(session.role);
+  const option = roleOptionFor(profile.role);
 
   return (
     <DropdownMenu>
@@ -55,24 +50,19 @@ export function UserMenu() {
         <Button variant="ghost" className="h-auto gap-2 px-2 py-1.5">
           <Avatar className="size-7">
             <AvatarFallback className="bg-secondary text-xs font-bold text-primary">
-              {initials(session.nombre)}
+              {initials(profile.nombre)}
             </AvatarFallback>
           </Avatar>
           <span className="hidden text-left sm:block">
-            <span className="block text-xs font-semibold leading-tight">{session.nombre}</span>
+            <span className="block text-xs font-semibold leading-tight">{profile.nombre}</span>
             <span className="block text-xs leading-tight text-muted-foreground">
-              {option?.label ?? session.role}
+              {option?.label ?? profile.role}
             </span>
           </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>
-          Modo demostración
-          <div className="mt-0.5 text-xs font-normal text-muted-foreground">
-            Sesión simulada — sin autenticación real todavía.
-          </div>
-        </DropdownMenuLabel>
+        <DropdownMenuLabel>Mi cuenta</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {option ? (
           <DropdownMenuItem asChild>
@@ -81,19 +71,8 @@ export function UserMenu() {
             </Link>
           </DropdownMenuItem>
         ) : null}
-        <DropdownMenuItem asChild>
-          <Link href="/login">
-            <UserRoundCog /> Cambiar de rol
-          </Link>
-        </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          variant="destructive"
-          onSelect={() => {
-            logout();
-            router.push("/");
-          }}
-        >
+        <DropdownMenuItem variant="destructive" onSelect={() => void signOut()}>
           <LogOut /> Cerrar sesión
         </DropdownMenuItem>
       </DropdownMenuContent>
