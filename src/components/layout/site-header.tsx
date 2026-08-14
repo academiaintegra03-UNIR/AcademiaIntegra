@@ -76,7 +76,7 @@ export function SiteHeader({ profile }: { profile: Profile | null }) {
         </NavigationMenu>
 
         <div className="ml-auto flex items-center gap-2">
-          <UserMenu profile={profile} />
+          <UserMenu profile={profile} compact />
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>

@@ -62,7 +62,10 @@ const organizationJsonLd = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="es" className={`${plusJakartaSans.variable} antialiased`}>
-      <body className="min-h-screen flex flex-col bg-background text-foreground">
+      <body
+        className="min-h-screen flex flex-col bg-background text-foreground"
+        suppressHydrationWarning
+      >
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

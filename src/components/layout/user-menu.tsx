@@ -5,6 +5,7 @@ import { LogOut, UserRoundCog } from "lucide-react";
 import { signOut } from "@/lib/auth/actions";
 import { roleOptionFor } from "@/lib/data/roles";
 import type { Profile } from "@/lib/types/session";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -28,10 +29,23 @@ function initials(name: string) {
   );
 }
 
-export function UserMenu({ profile }: { profile: Profile | null }) {
+export function UserMenu({
+  profile,
+  compact,
+}: {
+  profile: Profile | null;
+  /**
+   * True in the main site header, where a mobile hamburger menu already
+   * shows this same component uncollapsed — so below `lg` (where that menu
+   * takes over) these two full-width buttons would otherwise just crowd the
+   * logo and menu trigger. False (default) for the copy rendered inside
+   * that mobile menu itself, which should always show both actions.
+   */
+  compact?: boolean;
+}) {
   if (!profile) {
     return (
-      <div className="flex items-center gap-2">
+      <div className={cn("flex items-center gap-2", compact && "hidden lg:flex")}>
         <Button variant="ghost" asChild>
           <Link href="/login">Iniciar sesión</Link>
         </Button>
