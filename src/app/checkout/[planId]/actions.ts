@@ -1,9 +1,9 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildIntegritySignature } from "@/lib/wompi";
-import { absoluteUrl } from "@/lib/seo";
 import type { PlanType, UserRole } from "@/lib/supabase/database.types";
 
 export interface CheckoutState {
@@ -21,6 +21,20 @@ const ROLE_BY_PLAN_TYPE: Record<PlanType, UserRole> = {
   grupal: "acudiente",
   institucional: "colegio",
 };
+
+/**
+ * Derives the real, reachable origin from the incoming request instead of a
+ * static env var — works on localhost, any Vercel preview, and production
+ * without configuration. (A hardcoded/placeholder site URL here is exactly
+ * what sent Wompi's redirect to a domain that doesn't exist.)
+ */
+async function getOrigin(): Promise<string> {
+  const h = await headers();
+  const host = h.get("host");
+  if (!host) return "http://localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}
 
 /**
  * Creates the account up front (Supabase hashes the password — we never
@@ -83,6 +97,7 @@ export async function startCheckoutAction(formData: FormData): Promise<CheckoutS
   if (paymentError) return { error: "No se pudo iniciar el pago." };
 
   const signature = buildIntegritySignature({ reference, amountInCents, currency: "COP", integritySecret });
+  const origin = await getOrigin();
 
   const params = new URLSearchParams({
     "public-key": publicKey,
@@ -90,7 +105,9 @@ export async function startCheckoutAction(formData: FormData): Promise<CheckoutS
     "amount-in-cents": String(amountInCents),
     reference,
     "signature:integrity": signature,
-    "redirect-url": absoluteUrl("/checkout/gracias"),
+    // Wompi appends its own `?id=` / `&env=` to this — our own `ref` rides
+    // along so /checkout/gracias can look up the right payment.
+    "redirect-url": `${origin}/checkout/gracias?ref=${encodeURIComponent(reference)}`,
   });
 
   return { checkoutUrl: `https://checkout.wompi.co/p/?${params.toString()}` };
