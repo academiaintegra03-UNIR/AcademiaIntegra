@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { createUserAction } from "@/app/admin/usuarios/actions";
 import { roleOptions } from "@/lib/data/roles";
+import type { Colegio } from "@/lib/types/panels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,9 +27,12 @@ function generatePassword() {
   return Array.from(bytes, (b) => chars[b % chars.length]).join("");
 }
 
-export function CreateUserDialog() {
+const NO_COLEGIO = "__none__";
+
+export function CreateUserDialog({ colegios }: { colegios: Colegio[] }) {
   const [open, setOpen] = React.useState(false);
   const [role, setRole] = React.useState("");
+  const [colegioId, setColegioId] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string>();
   const [isPending, startTransition] = React.useTransition();
@@ -45,6 +49,7 @@ export function CreateUserDialog() {
       toast.success("Usuario creado — ya puede iniciar sesión.");
       setOpen(false);
       setRole("");
+      setColegioId("");
       setPassword("");
       formRef.current?.reset();
     });
@@ -118,7 +123,14 @@ export function CreateUserDialog() {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="new-user-role">Rol</Label>
               <input type="hidden" name="role" value={role} />
-              <Select value={role} onValueChange={setRole} disabled={isPending}>
+              <Select
+                value={role}
+                onValueChange={(next) => {
+                  setRole(next);
+                  if (next !== "estudiante") setColegioId("");
+                }}
+                disabled={isPending}
+              >
                 <SelectTrigger id="new-user-role" className="w-full">
                   <SelectValue placeholder="Selecciona un rol" />
                 </SelectTrigger>
@@ -131,6 +143,30 @@ export function CreateUserDialog() {
                 </SelectContent>
               </Select>
             </div>
+
+            {role === "estudiante" ? (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="new-user-colegio">Colegio</Label>
+                <input type="hidden" name="colegio_id" value={colegioId} />
+                <Select
+                  value={colegioId || NO_COLEGIO}
+                  onValueChange={(next) => setColegioId(next === NO_COLEGIO ? "" : next)}
+                  disabled={isPending}
+                >
+                  <SelectTrigger id="new-user-colegio" className="w-full">
+                    <SelectValue placeholder="Selecciona un colegio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_COLEGIO}>Sin colegio (independiente)</SelectItem>
+                    {colegios.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isPending}>

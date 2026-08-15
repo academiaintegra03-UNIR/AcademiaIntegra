@@ -15,5 +15,4 @@ export interface OrientationQuickReply {
 export const orientationQuickReplies: OrientationQuickReply[] = [
   { label: "Ver programas", href: "/programas" },
   { label: "Precios y planes", href: "/planes-precios" },
-  { label: "Hablar con un asesor humano", href: "/contacto" },
 ];

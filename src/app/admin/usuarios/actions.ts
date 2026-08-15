@@ -24,6 +24,7 @@ export async function createUserAction(formData: FormData): Promise<UserActionSt
   const password = String(formData.get("password") ?? "");
   const nombre = String(formData.get("nombre") ?? "").trim();
   const role = formData.get("role");
+  const colegioId = String(formData.get("colegio_id") ?? "").trim();
 
   if (!email || !nombre) return { error: "Completa el correo y el nombre." };
   if (password.length < 8) return { error: "La contraseña debe tener al menos 8 caracteres." };
@@ -34,7 +35,10 @@ export async function createUserAction(formData: FormData): Promise<UserActionSt
     email,
     password,
     email_confirm: true,
-    user_metadata: { role, nombre },
+    // handle_new_user (0003_relationships.sql) reads colegio_id from here too,
+    // so the profile and its colegio link are created atomically. Only
+    // meaningful for role "estudiante" — the trigger rejects it otherwise.
+    user_metadata: { role, nombre, colegio_id: role === "estudiante" ? colegioId : "" },
   });
 
   if (error) {
@@ -55,12 +59,16 @@ export async function updateUserAction(formData: FormData): Promise<UserActionSt
   const id = String(formData.get("id") ?? "");
   const nombre = String(formData.get("nombre") ?? "").trim();
   const role = formData.get("role");
+  const colegioId = String(formData.get("colegio_id") ?? "").trim();
 
   if (!id || !nombre) return { error: "Faltan datos del usuario." };
   if (!isValidRole(role)) return { error: "Selecciona un rol válido." };
 
   const admin = createAdminClient();
-  const { error } = await admin.from("profiles").update({ nombre, role }).eq("id", id);
+  const { error } = await admin
+    .from("profiles")
+    .update({ nombre, role, colegio_id: role === "estudiante" && colegioId ? colegioId : null })
+    .eq("id", id);
 
   if (error) return { error: "No se pudo actualizar el usuario." };
 

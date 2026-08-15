@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { roleOptions } from "@/lib/data/roles";
-import type { AdminUserRow } from "@/lib/types/panels";
+import type { AdminUserRow, Colegio } from "@/lib/types/panels";
 import type { Role } from "@/lib/types/session";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +14,15 @@ import { DeleteUserDialog } from "@/features/admin/delete-user-dialog";
 
 const ALL = "todos";
 
-export function UsersTable({ rows, currentUserId }: { rows: AdminUserRow[]; currentUserId: string }) {
+export function UsersTable({
+  rows,
+  currentUserId,
+  colegios,
+}: {
+  rows: AdminUserRow[];
+  currentUserId: string;
+  colegios: Colegio[];
+}) {
   const [roleFilter, setRoleFilter] = React.useState<Role | typeof ALL>(ALL);
   const filtered = roleFilter === ALL ? rows : rows.filter((r) => r.role === roleFilter);
 
@@ -66,7 +74,10 @@ export function UsersTable({ rows, currentUserId }: { rows: AdminUserRow[]; curr
                 filtered.map((user) => (
                   <TableRow key={user.id}>
                     <TableCell>
-                      <NameCell name={user.name} />
+                      <NameCell
+                        name={user.name}
+                        subtitle={user.role === "estudiante" ? (user.colegioNombre ?? "Independiente") : undefined}
+                      />
                     </TableCell>
                     <TableCell className="text-muted-foreground">{user.email}</TableCell>
                     <TableCell>
@@ -74,7 +85,7 @@ export function UsersTable({ rows, currentUserId }: { rows: AdminUserRow[]; curr
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
-                        <EditUserDialog user={user} />
+                        <EditUserDialog user={user} colegios={colegios} />
                         <DeleteUserDialog user={user} disabled={user.id === currentUserId} />
                       </div>
                     </TableCell>

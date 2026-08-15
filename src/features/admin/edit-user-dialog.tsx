@@ -5,7 +5,7 @@ import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { updateUserAction } from "@/app/admin/usuarios/actions";
 import { roleOptions } from "@/lib/data/roles";
-import type { AdminUserRow } from "@/lib/types/panels";
+import type { AdminUserRow, Colegio } from "@/lib/types/panels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,9 +21,12 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export function EditUserDialog({ user }: { user: AdminUserRow }) {
+const NO_COLEGIO = "__none__";
+
+export function EditUserDialog({ user, colegios }: { user: AdminUserRow; colegios: Colegio[] }) {
   const [open, setOpen] = React.useState(false);
   const [role, setRole] = React.useState<string>(user.role);
+  const [colegioId, setColegioId] = React.useState(user.colegioId ?? "");
   const [error, setError] = React.useState<string>();
   const [isPending, startTransition] = React.useTransition();
 
@@ -46,7 +49,10 @@ export function EditUserDialog({ user }: { user: AdminUserRow }) {
       onOpenChange={(next) => {
         setOpen(next);
         setError(undefined);
-        if (next) setRole(user.role);
+        if (next) {
+          setRole(user.role);
+          setColegioId(user.colegioId ?? "");
+        }
       }}
     >
       <DialogTrigger asChild>
@@ -82,7 +88,14 @@ export function EditUserDialog({ user }: { user: AdminUserRow }) {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor={`edit-user-role-${user.id}`}>Rol</Label>
               <input type="hidden" name="role" value={role} />
-              <Select value={role} onValueChange={setRole} disabled={isPending}>
+              <Select
+                value={role}
+                onValueChange={(next) => {
+                  setRole(next);
+                  if (next !== "estudiante") setColegioId("");
+                }}
+                disabled={isPending}
+              >
                 <SelectTrigger id={`edit-user-role-${user.id}`} className="w-full">
                   <SelectValue placeholder="Selecciona un rol" />
                 </SelectTrigger>
@@ -95,6 +108,30 @@ export function EditUserDialog({ user }: { user: AdminUserRow }) {
                 </SelectContent>
               </Select>
             </div>
+
+            {role === "estudiante" ? (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor={`edit-user-colegio-${user.id}`}>Colegio</Label>
+                <input type="hidden" name="colegio_id" value={colegioId} />
+                <Select
+                  value={colegioId || NO_COLEGIO}
+                  onValueChange={(next) => setColegioId(next === NO_COLEGIO ? "" : next)}
+                  disabled={isPending}
+                >
+                  <SelectTrigger id={`edit-user-colegio-${user.id}`} className="w-full">
+                    <SelectValue placeholder="Selecciona un colegio" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_COLEGIO}>Sin colegio (independiente)</SelectItem>
+                    {colegios.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.nombre}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isPending}>

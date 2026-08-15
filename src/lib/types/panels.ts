@@ -140,6 +140,11 @@ export interface AdminAlert {
   tone: StatusTone;
 }
 
+export interface Colegio {
+  id: string;
+  nombre: string;
+}
+
 export interface AdminUserRow {
   id: string;
   name: string;
@@ -147,6 +152,9 @@ export interface AdminUserRow {
   role: Role;
   roleLabel: string;
   roleTone: StatusTone;
+  /** Only meaningful when role === "estudiante". null = independiente. */
+  colegioId: string | null;
+  colegioNombre: string | null;
 }
 
 export interface AdminProgramRow {
