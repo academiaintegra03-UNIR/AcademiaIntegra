@@ -145,6 +145,11 @@ export interface Colegio {
   nombre: string;
 }
 
+export interface EstudianteOption {
+  id: string;
+  nombre: string;
+}
+
 export interface AdminUserRow {
   id: string;
   name: string;
@@ -155,6 +160,8 @@ export interface AdminUserRow {
   /** Only meaningful when role === "estudiante". null = independiente. */
   colegioId: string | null;
   colegioNombre: string | null;
+  /** Only meaningful when role === "acudiente". */
+  linkedStudentIds: string[];
 }
 
 export interface AdminProgramRow {

@@ -102,3 +102,41 @@ export async function deleteUserAction(formData: FormData): Promise<UserActionSt
   revalidatePath("/admin/usuarios");
   return { success: true };
 }
+
+export async function linkGuardianStudentAction(formData: FormData): Promise<UserActionState> {
+  await requireRole("administrador");
+
+  const guardianId = String(formData.get("guardian_id") ?? "");
+  const studentId = String(formData.get("student_id") ?? "");
+  if (!guardianId || !studentId) return { error: "Selecciona un estudiante." };
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("guardian_students")
+    .upsert({ guardian_id: guardianId, student_id: studentId }, { onConflict: "guardian_id,student_id", ignoreDuplicates: true });
+
+  if (error) return { error: "No se pudo vincular el estudiante." };
+
+  revalidatePath("/admin/usuarios");
+  return { success: true };
+}
+
+export async function unlinkGuardianStudentAction(formData: FormData): Promise<UserActionState> {
+  await requireRole("administrador");
+
+  const guardianId = String(formData.get("guardian_id") ?? "");
+  const studentId = String(formData.get("student_id") ?? "");
+  if (!guardianId || !studentId) return { error: "Faltan datos." };
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("guardian_students")
+    .delete()
+    .eq("guardian_id", guardianId)
+    .eq("student_id", studentId);
+
+  if (error) return { error: "No se pudo desvincular el estudiante." };
+
+  revalidatePath("/admin/usuarios");
+  return { success: true };
+}

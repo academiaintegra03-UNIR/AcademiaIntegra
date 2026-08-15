@@ -1,11 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 import { toast } from "sonner";
-import { updateUserAction } from "@/app/admin/usuarios/actions";
+import {
+  linkGuardianStudentAction,
+  unlinkGuardianStudentAction,
+  updateUserAction,
+} from "@/app/admin/usuarios/actions";
 import { roleOptions } from "@/lib/data/roles";
-import type { AdminUserRow, Colegio } from "@/lib/types/panels";
+import type { AdminUserRow, Colegio, EstudianteOption } from "@/lib/types/panels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,12 +27,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const NO_COLEGIO = "__none__";
 
-export function EditUserDialog({ user, colegios }: { user: AdminUserRow; colegios: Colegio[] }) {
+export function EditUserDialog({
+  user,
+  colegios,
+  estudiantes,
+}: {
+  user: AdminUserRow;
+  colegios: Colegio[];
+  estudiantes: EstudianteOption[];
+}) {
   const [open, setOpen] = React.useState(false);
   const [role, setRole] = React.useState<string>(user.role);
   const [colegioId, setColegioId] = React.useState(user.colegioId ?? "");
   const [error, setError] = React.useState<string>();
   const [isPending, startTransition] = React.useTransition();
+
+  const [linkedStudentIds, setLinkedStudentIds] = React.useState<string[]>(user.linkedStudentIds);
+  const [studentToAdd, setStudentToAdd] = React.useState("");
+  const [isLinkPending, startLinkTransition] = React.useTransition();
+  const availableStudents = estudiantes.filter((s) => !linkedStudentIds.includes(s.id));
+  const nombreByStudentId = new Map(estudiantes.map((s) => [s.id, s.nombre]));
 
   function handleSubmit(formData: FormData) {
     setError(undefined);
@@ -43,6 +61,39 @@ export function EditUserDialog({ user, colegios }: { user: AdminUserRow; colegio
     });
   }
 
+  function handleAddStudent() {
+    if (!studentToAdd) return;
+    setError(undefined);
+    const studentId = studentToAdd;
+    startLinkTransition(async () => {
+      const fd = new FormData();
+      fd.set("guardian_id", user.id);
+      fd.set("student_id", studentId);
+      const result = await linkGuardianStudentAction(fd);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      setLinkedStudentIds((prev) => [...prev, studentId]);
+      setStudentToAdd("");
+    });
+  }
+
+  function handleRemoveStudent(studentId: string) {
+    setError(undefined);
+    startLinkTransition(async () => {
+      const fd = new FormData();
+      fd.set("guardian_id", user.id);
+      fd.set("student_id", studentId);
+      const result = await unlinkGuardianStudentAction(fd);
+      if (result.error) {
+        setError(result.error);
+        return;
+      }
+      setLinkedStudentIds((prev) => prev.filter((id) => id !== studentId));
+    });
+  }
+
   return (
     <Dialog
       open={open}
@@ -52,6 +103,8 @@ export function EditUserDialog({ user, colegios }: { user: AdminUserRow; colegio
         if (next) {
           setRole(user.role);
           setColegioId(user.colegioId ?? "");
+          setLinkedStudentIds(user.linkedStudentIds);
+          setStudentToAdd("");
         }
       }}
     >
@@ -130,6 +183,65 @@ export function EditUserDialog({ user, colegios }: { user: AdminUserRow; colegio
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+            ) : null}
+
+            {role === "acudiente" ? (
+              <div className="flex flex-col gap-1.5">
+                <Label>Estudiantes vinculados</Label>
+                <p className="text-xs text-muted-foreground">
+                  Los cambios aquí se guardan de inmediato — no hace falta &ldquo;Guardar cambios&rdquo;.
+                </p>
+
+                {linkedStudentIds.length > 0 ? (
+                  <ul className="flex flex-col gap-1">
+                    {linkedStudentIds.map((studentId) => (
+                      <li
+                        key={studentId}
+                        className="flex items-center justify-between rounded-lg border border-border px-2.5 py-1.5 text-sm"
+                      >
+                        <span>{nombreByStudentId.get(studentId) ?? "Estudiante eliminado"}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          disabled={isLinkPending}
+                          aria-label="Quitar vínculo"
+                          onClick={() => handleRemoveStudent(studentId)}
+                        >
+                          <X />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Sin estudiantes vinculados todavía.</p>
+                )}
+
+                {availableStudents.length > 0 ? (
+                  <div className="flex gap-2">
+                    <Select value={studentToAdd} onValueChange={setStudentToAdd} disabled={isLinkPending}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Vincular un estudiante..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableStudents.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isLinkPending || !studentToAdd}
+                      onClick={handleAddStudent}
+                    >
+                      Agregar
+                    </Button>
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </div>

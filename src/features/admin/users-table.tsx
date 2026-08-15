@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { roleOptions } from "@/lib/data/roles";
-import type { AdminUserRow, Colegio } from "@/lib/types/panels";
+import type { AdminUserRow, Colegio, EstudianteOption } from "@/lib/types/panels";
 import type { Role } from "@/lib/types/session";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,10 +18,12 @@ export function UsersTable({
   rows,
   currentUserId,
   colegios,
+  estudiantes,
 }: {
   rows: AdminUserRow[];
   currentUserId: string;
   colegios: Colegio[];
+  estudiantes: EstudianteOption[];
 }) {
   const [roleFilter, setRoleFilter] = React.useState<Role | typeof ALL>(ALL);
   const filtered = roleFilter === ALL ? rows : rows.filter((r) => r.role === roleFilter);
@@ -76,7 +78,15 @@ export function UsersTable({
                     <TableCell>
                       <NameCell
                         name={user.name}
-                        subtitle={user.role === "estudiante" ? (user.colegioNombre ?? "Independiente") : undefined}
+                        subtitle={
+                          user.role === "estudiante"
+                            ? (user.colegioNombre ?? "Independiente")
+                            : user.role === "acudiente"
+                              ? user.linkedStudentIds.length === 0
+                                ? "Sin estudiantes vinculados"
+                                : `${user.linkedStudentIds.length} estudiante${user.linkedStudentIds.length === 1 ? "" : "s"} vinculado${user.linkedStudentIds.length === 1 ? "" : "s"}`
+                              : undefined
+                        }
                       />
                     </TableCell>
                     <TableCell className="text-muted-foreground">{user.email}</TableCell>
@@ -85,7 +95,7 @@ export function UsersTable({
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-end gap-1">
-                        <EditUserDialog user={user} colegios={colegios} />
+                        <EditUserDialog user={user} colegios={colegios} estudiantes={estudiantes} />
                         <DeleteUserDialog user={user} disabled={user.id === currentUserId} />
                       </div>
                     </TableCell>
