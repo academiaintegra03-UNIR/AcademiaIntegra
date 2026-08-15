@@ -1,13 +1,15 @@
-import { Bot, Home, Users } from "lucide-react";
+import { Bot, CreditCard, Home, Tag, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/require-role";
 import { DashboardShell, type DashboardNavItem } from "@/components/layout/dashboard-shell";
 
-// Programas, Matrículas, Pagos y Reportes siguen con datos de prueba
-// simulados — ocultos del menú hasta que tengan datos reales. Las páginas
-// en sí no se borraron, solo el enlace en el nav.
+// Programas, Matrículas y Reportes siguen con datos de prueba simulados —
+// ocultos del menú hasta que tengan datos reales. Las páginas en sí no se
+// borraron, solo el enlace en el nav.
 const navItems: DashboardNavItem[] = [
   { href: "/admin", label: "Resumen general", icon: <Home /> },
   { href: "/admin/usuarios", label: "Usuarios", icon: <Users /> },
+  { href: "/admin/planes", label: "Planes", icon: <Tag /> },
+  { href: "/admin/pagos", label: "Pagos", icon: <CreditCard /> },
   { href: "/admin/ia", label: "IA (Álex)", icon: <Bot /> },
 ];
 

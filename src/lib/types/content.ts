@@ -72,16 +72,6 @@ export interface Country {
   faqs: CountryFaq[];
 }
 
-export interface PricingPlan {
-  name: string;
-  tagline: string;
-  price: string;
-  period: string;
-  badge: string | null;
-  features: string[];
-  pendingValidation?: boolean;
-}
-
 export interface FaqItem {
   q: string;
   a: string;

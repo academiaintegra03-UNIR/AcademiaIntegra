@@ -13,6 +13,10 @@ export type UserRole =
   | "tutor"
   | "administrador";
 
+export type PlanType = "individual" | "grupal" | "institucional";
+export type PaymentStatus = "pending" | "approved" | "declined" | "error" | "voided";
+export type SubscriptionStatus = "active" | "expired" | "cancelled";
+
 export interface Database {
   public: {
     Tables: {
@@ -91,11 +95,135 @@ export interface Database {
         };
         Relationships: [];
       };
+      plans: {
+        Row: {
+          id: string;
+          name: string;
+          description: string;
+          type: PlanType;
+          price_cop: number;
+          seat_limit: number | null;
+          period: string;
+          badge: string | null;
+          features: string[];
+          group_label: string | null;
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string;
+          type: PlanType;
+          price_cop: number;
+          seat_limit?: number | null;
+          period: string;
+          badge?: string | null;
+          features?: string[];
+          group_label?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string;
+          type?: PlanType;
+          price_cop?: number;
+          seat_limit?: number | null;
+          period?: string;
+          badge?: string | null;
+          features?: string[];
+          group_label?: string | null;
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      payments: {
+        Row: {
+          id: string;
+          reference: string;
+          plan_id: string;
+          email: string;
+          nombre: string;
+          wompi_transaction_id: string | null;
+          amount_cop: number;
+          status: PaymentStatus;
+          raw_webhook: unknown;
+          profile_id: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          reference: string;
+          plan_id: string;
+          email: string;
+          nombre: string;
+          wompi_transaction_id?: string | null;
+          amount_cop: number;
+          status?: PaymentStatus;
+          raw_webhook?: unknown;
+          profile_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          reference?: string;
+          plan_id?: string;
+          email?: string;
+          nombre?: string;
+          wompi_transaction_id?: string | null;
+          amount_cop?: number;
+          status?: PaymentStatus;
+          raw_webhook?: unknown;
+          profile_id?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      subscriptions: {
+        Row: {
+          id: string;
+          plan_id: string;
+          profile_id: string;
+          status: SubscriptionStatus;
+          started_at: string;
+          expires_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          plan_id: string;
+          profile_id: string;
+          status?: SubscriptionStatus;
+          started_at?: string;
+          expires_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          plan_id?: string;
+          profile_id?: string;
+          status?: SubscriptionStatus;
+          started_at?: string;
+          expires_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
     Enums: {
       user_role: UserRole;
+      plan_type: PlanType;
     };
     CompositeTypes: Record<string, never>;
   };
