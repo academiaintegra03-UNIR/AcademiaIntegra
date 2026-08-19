@@ -43,6 +43,18 @@ function resolvePath(obj: Record<string, unknown>, path: string): unknown {
   }, obj);
 }
 
+export interface WompiChecksumResult {
+  valid: boolean;
+  /** Diagnostics safe to log — never includes the secret itself. */
+  debug: {
+    properties: string[];
+    resolvedValues: unknown[];
+    timestamp: number;
+    expectedChecksum: string;
+    receivedChecksum: string;
+  };
+}
+
 /**
  * Verifies a Wompi webhook checksum. Never process an event without calling
  * this first — the endpoint is public and unauthenticated by design (Wompi
@@ -50,9 +62,20 @@ function resolvePath(obj: Record<string, unknown>, path: string): unknown {
  * and someone POSTing a fake "payment approved" event.
  * https://docs.wompi.co/docs/colombia/eventos/
  */
-export function verifyWompiWebhookChecksum(event: WompiEvent, eventsSecret: string): boolean {
-  const values = event.signature.properties.map((path) => resolvePath(event.data, path) ?? "");
-  const raw = `${values.join("")}${event.timestamp}${eventsSecret}`;
-  const expected = createHash("sha256").update(raw).digest("hex");
-  return expected.toLowerCase() === event.signature.checksum.toLowerCase();
+export function verifyWompiWebhookChecksum(event: WompiEvent, eventsSecret: string): WompiChecksumResult {
+  const resolvedValues = event.signature.properties.map((path) => resolvePath(event.data, path) ?? "");
+  const raw = `${resolvedValues.join("")}${event.timestamp}${eventsSecret}`;
+  const expectedChecksum = createHash("sha256").update(raw).digest("hex");
+  const receivedChecksum = event.signature.checksum ?? "";
+
+  return {
+    valid: expectedChecksum.toLowerCase() === receivedChecksum.toLowerCase(),
+    debug: {
+      properties: event.signature.properties,
+      resolvedValues,
+      timestamp: event.timestamp,
+      expectedChecksum,
+      receivedChecksum,
+    },
+  };
 }
