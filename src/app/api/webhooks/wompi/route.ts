@@ -42,8 +42,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  if (!event?.signature?.checksum || !verifyWompiWebhookChecksum(event, eventsSecret)) {
-    console.error("Wompi webhook: checksum mismatch — rejecting.");
+  if (!event?.signature?.checksum) {
+    console.error("Wompi webhook: missing signature — rejecting.");
+    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  const checksumResult = verifyWompiWebhookChecksum(event, eventsSecret);
+  if (!checksumResult.valid) {
+    // Safe to log: debug never includes the events secret itself, only the
+    // resolved property values and the two checksums being compared.
+    console.error("Wompi webhook: checksum mismatch — rejecting.", checksumResult.debug);
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 

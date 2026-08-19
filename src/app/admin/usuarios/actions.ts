@@ -97,7 +97,10 @@ export async function deleteUserAction(formData: FormData): Promise<UserActionSt
   }
 
   const { error } = await admin.auth.admin.deleteUser(id);
-  if (error) return { error: "No se pudo eliminar el usuario." };
+  if (error) {
+    console.error("Failed to delete user:", error);
+    return { error: "No se pudo eliminar el usuario." };
+  }
 
   revalidatePath("/admin/usuarios");
   return { success: true };
