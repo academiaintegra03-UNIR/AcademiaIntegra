@@ -16,6 +16,8 @@ export type UserRole =
 export type PlanType = "individual" | "grupal" | "institucional";
 export type PaymentStatus = "pending" | "approved" | "declined" | "error" | "voided";
 export type SubscriptionStatus = "active" | "expired" | "cancelled";
+export type DocumentType = "CC" | "TI" | "CE" | "PA" | "NIT";
+export type PlanBillingType = "pago_unico" | "mensual" | "prueba_gratis";
 
 export interface Database {
   public: {
@@ -53,10 +55,67 @@ export interface Database {
         Update: { guardian_id?: string; student_id?: string; created_at?: string };
         Relationships: [];
       };
-      tutor_students: {
-        Row: { tutor_id: string; student_id: string; created_at: string };
-        Insert: { tutor_id: string; student_id: string; created_at?: string };
-        Update: { tutor_id?: string; student_id?: string; created_at?: string };
+      grupos: {
+        Row: {
+          id: string;
+          name: string;
+          colegio_id: string | null;
+          tutor_id: string | null;
+          es_default_colegio: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          colegio_id?: string | null;
+          tutor_id?: string | null;
+          es_default_colegio?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          colegio_id?: string | null;
+          tutor_id?: string | null;
+          es_default_colegio?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      grupo_estudiantes: {
+        Row: { grupo_id: string; student_id: string; created_at: string };
+        Insert: { grupo_id: string; student_id: string; created_at?: string };
+        Update: { grupo_id?: string; student_id?: string; created_at?: string };
+        Relationships: [];
+      };
+      profile_contacto: {
+        Row: {
+          profile_id: string;
+          telefono: string | null;
+          tipo_documento: DocumentType | null;
+          numero_documento: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          profile_id: string;
+          telefono?: string | null;
+          tipo_documento?: DocumentType | null;
+          numero_documento?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          profile_id?: string;
+          telefono?: string | null;
+          tipo_documento?: DocumentType | null;
+          numero_documento?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Relationships: [];
       };
       chat_logs: {
@@ -108,6 +167,10 @@ export interface Database {
           features: string[];
           group_label: string | null;
           active: boolean;
+          allow_subgrupos: boolean;
+          allow_acudientes: boolean;
+          billing_type: PlanBillingType;
+          duration_days: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -123,6 +186,10 @@ export interface Database {
           features?: string[];
           group_label?: string | null;
           active?: boolean;
+          allow_subgrupos?: boolean;
+          allow_acudientes?: boolean;
+          billing_type?: PlanBillingType;
+          duration_days?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -138,6 +205,10 @@ export interface Database {
           features?: string[];
           group_label?: string | null;
           active?: boolean;
+          allow_subgrupos?: boolean;
+          allow_acudientes?: boolean;
+          billing_type?: PlanBillingType;
+          duration_days?: number | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -196,6 +267,7 @@ export interface Database {
           status: SubscriptionStatus;
           started_at: string;
           expires_at: string | null;
+          seat_limit_override: number | null;
           created_at: string;
         };
         Insert: {
@@ -205,6 +277,7 @@ export interface Database {
           status?: SubscriptionStatus;
           started_at?: string;
           expires_at?: string | null;
+          seat_limit_override?: number | null;
           created_at?: string;
         };
         Update: {
@@ -214,6 +287,7 @@ export interface Database {
           status?: SubscriptionStatus;
           started_at?: string;
           expires_at?: string | null;
+          seat_limit_override?: number | null;
           created_at?: string;
         };
         Relationships: [];

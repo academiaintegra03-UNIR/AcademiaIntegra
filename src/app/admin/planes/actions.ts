@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
-import type { PlanType } from "@/lib/supabase/database.types";
+import type { PlanType, PlanBillingType } from "@/lib/supabase/database.types";
 
 export interface PlanActionState {
   error?: string;
@@ -23,6 +23,12 @@ function isValidType(value: FormDataEntryValue | null): value is PlanType {
   return value === "individual" || value === "grupal" || value === "institucional";
 }
 
+const REQUIRES_DURATION: PlanBillingType[] = ["mensual", "prueba_gratis"];
+
+function isValidBillingType(value: FormDataEntryValue | null): value is PlanBillingType {
+  return value === "pago_unico" || value === "mensual" || value === "prueba_gratis";
+}
+
 function readPlanForm(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
@@ -33,17 +39,30 @@ function readPlanForm(formData: FormData) {
   const badge = String(formData.get("badge") ?? "").trim();
   const groupLabel = String(formData.get("group_label") ?? "").trim();
   const features = parseFeatures(String(formData.get("features") ?? ""));
+  const allowSubgrupos = formData.get("allow_subgrupos") !== "false";
+  const allowAcudientes = formData.get("allow_acudientes") !== "false";
+  const billingType = formData.get("billing_type");
+  const durationDaysRaw = String(formData.get("duration_days") ?? "").trim();
 
   if (!name || !description || !period) {
     return { error: "Completa el nombre, la descripción y el período." } as const;
   }
   if (!isValidType(type)) return { error: "Selecciona un tipo de plan válido." } as const;
   if (!Number.isFinite(priceCop) || priceCop < 0) return { error: "El precio no es válido." } as const;
+  if (!isValidBillingType(billingType)) return { error: "Selecciona un tipo de cobro válido." } as const;
 
   const needsSeatLimit = MULTI_SEAT_TYPES.includes(type);
   const seatLimit = needsSeatLimit ? Number(seatLimitRaw) : null;
   if (needsSeatLimit && (!Number.isFinite(seatLimit) || (seatLimit as number) <= 0)) {
     return { error: "Los planes grupales e institucionales necesitan un cupo de estudiantes válido." } as const;
+  }
+
+  const durationDays = durationDaysRaw ? Number(durationDaysRaw) : null;
+  if (durationDaysRaw && (!Number.isFinite(durationDays) || (durationDays as number) <= 0)) {
+    return { error: "La duración debe ser un número de días mayor a 0." } as const;
+  }
+  if (REQUIRES_DURATION.includes(billingType) && !durationDays) {
+    return { error: "Los planes mensuales y de prueba gratis necesitan una duración en días." } as const;
   }
 
   return {
@@ -57,6 +76,10 @@ function readPlanForm(formData: FormData) {
       badge: badge || null,
       features,
       group_label: groupLabel || null,
+      allow_subgrupos: allowSubgrupos,
+      allow_acudientes: allowAcudientes,
+      billing_type: billingType,
+      duration_days: durationDays,
     },
   } as const;
 }

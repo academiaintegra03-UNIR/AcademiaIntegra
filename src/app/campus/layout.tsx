@@ -1,9 +1,10 @@
-import { BarChart3, Bot, BookOpen, ClipboardList, Compass, HelpCircle, Home } from "lucide-react";
+import { BarChart3, Bot, BookOpen, ClipboardList, Compass, HelpCircle, Home, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/require-role";
 import { DashboardShell, type DashboardNavItem } from "@/components/layout/dashboard-shell";
 
 const navItems: DashboardNavItem[] = [
   { href: "/campus", label: "Inicio", icon: <Home /> },
+  { href: "/campus/mi-grupo", label: "Mi grupo", icon: <Users /> },
   { href: "/campus/mi-ruta", label: "Mi ruta", icon: <Compass /> },
   { href: "/campus/cursos", label: "Mis cursos", icon: <BookOpen /> },
   { href: "/campus/banco-preguntas", label: "Banco de preguntas", icon: <HelpCircle /> },

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/require-role";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { roleOptions } from "@/lib/data/roles";
+import { readContactoForm } from "@/lib/validation/contacto";
 import type { Role } from "@/lib/types/session";
 
 export interface UserActionState {
@@ -30,15 +31,25 @@ export async function createUserAction(formData: FormData): Promise<UserActionSt
   if (password.length < 8) return { error: "La contraseña debe tener al menos 8 caracteres." };
   if (!isValidRole(role)) return { error: "Selecciona un rol válido." };
 
+  const contacto = readContactoForm(formData);
+  if ("error" in contacto) return { error: contacto.error };
+
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    // handle_new_user (0003_relationships.sql) reads colegio_id from here too,
-    // so the profile and its colegio link are created atomically. Only
-    // meaningful for role "estudiante" — the trigger rejects it otherwise.
-    user_metadata: { role, nombre, colegio_id: role === "estudiante" ? colegioId : "" },
+    // handle_new_user (0003_relationships.sql, 0011_profile_contacto.sql)
+    // lee estos campos del metadata, así que el perfil, su colegio y su
+    // contacto quedan creados atómicamente en un solo insert.
+    user_metadata: {
+      role,
+      nombre,
+      colegio_id: role === "estudiante" ? colegioId : "",
+      telefono: contacto.data.telefono ?? "",
+      tipo_documento: contacto.data.tipoDocumento ?? "",
+      numero_documento: contacto.data.numeroDocumento ?? "",
+    },
   });
 
   if (error) {
@@ -60,9 +71,15 @@ export async function updateUserAction(formData: FormData): Promise<UserActionSt
   const nombre = String(formData.get("nombre") ?? "").trim();
   const role = formData.get("role");
   const colegioId = String(formData.get("colegio_id") ?? "").trim();
+  // Vacío = no cambiarla — solo se toca si el admin escribió algo.
+  const password = String(formData.get("password") ?? "");
 
   if (!id || !nombre) return { error: "Faltan datos del usuario." };
   if (!isValidRole(role)) return { error: "Selecciona un rol válido." };
+  if (password && password.length < 8) return { error: "La contraseña debe tener al menos 8 caracteres." };
+
+  const contacto = readContactoForm(formData);
+  if ("error" in contacto) return { error: contacto.error };
 
   const admin = createAdminClient();
   const { error } = await admin
@@ -70,7 +87,30 @@ export async function updateUserAction(formData: FormData): Promise<UserActionSt
     .update({ nombre, role, colegio_id: role === "estudiante" && colegioId ? colegioId : null })
     .eq("id", id);
 
-  if (error) return { error: "No se pudo actualizar el usuario." };
+  if (error) {
+    console.error("Failed to update user:", error);
+    return { error: "No se pudo actualizar el usuario." };
+  }
+
+  if (password) {
+    const { error: passwordError } = await admin.auth.admin.updateUserById(id, { password });
+    if (passwordError) {
+      console.error("Failed to update user password:", passwordError);
+      return { error: "El usuario se actualizó, pero no se pudo cambiar la contraseña." };
+    }
+  }
+
+  const { error: contactoError } = await admin.from("profile_contacto").upsert({
+    profile_id: id,
+    telefono: contacto.data.telefono,
+    tipo_documento: contacto.data.tipoDocumento,
+    numero_documento: contacto.data.numeroDocumento,
+  });
+
+  if (contactoError) {
+    console.error("Failed to update user contacto:", contactoError);
+    return { error: "El usuario se actualizó, pero no se pudo guardar teléfono/documento." };
+  }
 
   revalidatePath("/admin/usuarios");
   return { success: true };

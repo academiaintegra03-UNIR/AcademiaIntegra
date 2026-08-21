@@ -3,10 +3,11 @@
 import * as React from "react";
 import { toast } from "sonner";
 import { createPlanAction, updatePlanAction } from "@/app/admin/planes/actions";
-import type { Plan, PlanType } from "@/lib/types/billing";
+import type { Plan, PlanType, PlanBillingType } from "@/lib/types/billing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -37,6 +38,9 @@ export function PlanFormDialog({
   const [type, setType] = React.useState<PlanType | "">(plan?.type ?? "");
   const [groupMode, setGroupMode] = React.useState(plan?.groupLabel || NO_GROUP);
   const [newGroupLabel, setNewGroupLabel] = React.useState("");
+  const [allowSubgrupos, setAllowSubgrupos] = React.useState(plan?.allowSubgrupos ?? true);
+  const [allowAcudientes, setAllowAcudientes] = React.useState(plan?.allowAcudientes ?? true);
+  const [billingType, setBillingType] = React.useState<PlanBillingType>(plan?.billingType ?? "pago_unico");
   const [error, setError] = React.useState<string>();
   const [isPending, startTransition] = React.useTransition();
   const formRef = React.useRef<HTMLFormElement>(null);
@@ -58,6 +62,14 @@ export function PlanFormDialog({
     });
   }
 
+  // Sin esto, React resetea los campos no controlados apenas la función
+  // termina (aunque devolvamos { error }), y el usuario pierde lo que
+  // escribió cada vez que falla una validación.
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    handleSubmit(new FormData(e.currentTarget));
+  }
+
   return (
     <Dialog
       open={open}
@@ -68,12 +80,15 @@ export function PlanFormDialog({
           setType(plan?.type ?? "");
           setGroupMode(plan?.groupLabel || NO_GROUP);
           setNewGroupLabel("");
+          setAllowSubgrupos(plan?.allowSubgrupos ?? true);
+          setAllowAcudientes(plan?.allowAcudientes ?? true);
+          setBillingType(plan?.billingType ?? "pago_unico");
         }
       }}
     >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
-        <form ref={formRef} action={handleSubmit}>
+        <form ref={formRef} onSubmit={onSubmit}>
           {isEdit ? <input type="hidden" name="id" value={plan!.id} /> : null}
           <DialogHeader>
             <DialogTitle>{isEdit ? "Editar plan" : "Crear plan"}</DialogTitle>
@@ -134,6 +149,43 @@ export function PlanFormDialog({
               />
             </div>
 
+            <div className="grid grid-cols-[1.2fr_1fr] gap-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="plan-billing-type">Tipo de cobro</Label>
+                <input type="hidden" name="billing_type" value={billingType} />
+                <Select
+                  value={billingType}
+                  onValueChange={(next) => setBillingType(next as PlanBillingType)}
+                  disabled={isPending}
+                >
+                  <SelectTrigger id="plan-billing-type" className="w-full">
+                    <SelectValue placeholder="Selecciona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pago_unico">Pago único</SelectItem>
+                    <SelectItem value="mensual">Mensual</SelectItem>
+                    <SelectItem value="prueba_gratis">Prueba gratis</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="plan-duration">Duración (días)</Label>
+                <Input
+                  id="plan-duration"
+                  name="duration_days"
+                  type="number"
+                  min={1}
+                  defaultValue={plan?.durationDays ?? undefined}
+                  placeholder={billingType === "pago_unico" ? "Sin vencimiento" : "Ej. 30"}
+                  required={billingType !== "pago_unico"}
+                  disabled={isPending}
+                />
+              </div>
+            </div>
+            <p className="-mt-2.5 text-xs text-muted-foreground">
+              Cuántos días dura la suscripción desde que se activa. En pago único, vacío = no vence.
+            </p>
+
             {type === "grupal" || type === "institucional" ? (
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="plan-seats">Cupo de estudiantes</Label>
@@ -146,6 +198,35 @@ export function PlanFormDialog({
                   required
                   disabled={isPending}
                 />
+              </div>
+            ) : null}
+
+            {type === "institucional" ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <input type="hidden" name="allow_subgrupos" value={String(allowSubgrupos)} />
+                  <Checkbox
+                    id="plan-allow-subgrupos"
+                    checked={allowSubgrupos}
+                    onCheckedChange={(checked) => setAllowSubgrupos(checked === true)}
+                    disabled={isPending}
+                  />
+                  <Label htmlFor="plan-allow-subgrupos" className="font-normal">
+                    El colegio puede crear sus propios subgrupos (8A, 8B...)
+                  </Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="hidden" name="allow_acudientes" value={String(allowAcudientes)} />
+                  <Checkbox
+                    id="plan-allow-acudientes"
+                    checked={allowAcudientes}
+                    onCheckedChange={(checked) => setAllowAcudientes(checked === true)}
+                    disabled={isPending}
+                  />
+                  <Label htmlFor="plan-allow-acudientes" className="font-normal">
+                    El colegio puede invitar acudientes para sus estudiantes
+                  </Label>
+                </div>
               </div>
             ) : null}
 

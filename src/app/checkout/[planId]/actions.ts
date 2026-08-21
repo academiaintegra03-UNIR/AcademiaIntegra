@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildIntegritySignature } from "@/lib/wompi";
+import { readContactoForm } from "@/lib/validation/contacto";
 import type { PlanType, UserRole } from "@/lib/supabase/database.types";
 
 export interface CheckoutState {
@@ -52,6 +53,9 @@ export async function startCheckoutAction(formData: FormData): Promise<CheckoutS
   if (!planId || !nombre || !email) return { error: "Completa todos los campos." };
   if (password.length < 8) return { error: "La contraseña debe tener al menos 8 caracteres." };
 
+  const contacto = readContactoForm(formData);
+  if ("error" in contacto) return { error: contacto.error };
+
   // .trim(): a stray trailing space/newline from copy-pasting the secret out
   // of Wompi's dashboard silently changes the hash and Wompi rejects it as
   // "firma inválida" with no other clue — this is the #1 real-world cause.
@@ -70,7 +74,13 @@ export async function startCheckoutAction(formData: FormData): Promise<CheckoutS
     email,
     password,
     email_confirm: true,
-    user_metadata: { role: ROLE_BY_PLAN_TYPE[plan.type], nombre },
+    user_metadata: {
+      role: ROLE_BY_PLAN_TYPE[plan.type],
+      nombre,
+      telefono: contacto.data.telefono ?? "",
+      tipo_documento: contacto.data.tipoDocumento ?? "",
+      numero_documento: contacto.data.numeroDocumento ?? "",
+    },
   });
 
   if (createError || !created.user) {

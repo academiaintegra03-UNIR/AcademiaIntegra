@@ -1,6 +1,7 @@
 import { GraduationCap, Settings, School, Presentation, Users } from "lucide-react";
 import type { StatusTone } from "@/components/shared/status-badge";
 import type { Role, RoleOption } from "@/lib/types/session";
+import type { PlanType } from "@/lib/supabase/database.types";
 
 export const roleOptions: RoleOption[] = [
   {
@@ -56,3 +57,10 @@ const roleTones: Record<Role, StatusTone> = {
 export function roleTone(role: Role): StatusTone {
   return roleTones[role];
 }
+
+/** Qué tipo de plan corresponde a cada rol que puede tener suscripción. */
+export const EXPECTED_PLAN_TYPE_BY_ROLE: Partial<Record<Role, PlanType>> = {
+  estudiante: "individual",
+  acudiente: "grupal",
+  colegio: "institucional",
+};

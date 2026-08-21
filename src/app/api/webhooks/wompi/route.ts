@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyWompiWebhookChecksum, type WompiEvent } from "@/lib/wompi";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { activateSubscription } from "@/lib/subscriptions";
 import type { PaymentStatus } from "@/lib/supabase/database.types";
 
 export const runtime = "nodejs";
@@ -88,11 +89,8 @@ export async function POST(request: NextRequest) {
     .eq("id", payment.id);
 
   if (status === "approved" && payment.profile_id) {
-    await admin.from("subscriptions").insert({
-      plan_id: payment.plan_id,
-      profile_id: payment.profile_id,
-      status: "active",
-    });
+    const { error: subError } = await activateSubscription(payment.profile_id, payment.plan_id);
+    if (subError) console.error("Wompi webhook: failed to activate subscription:", subError);
   }
 
   return NextResponse.json({ received: true });

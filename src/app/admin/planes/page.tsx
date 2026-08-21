@@ -27,6 +27,10 @@ async function getPlans(): Promise<Plan[]> {
     features: p.features,
     groupLabel: p.group_label,
     active: p.active,
+    allowSubgrupos: p.allow_subgrupos,
+    allowAcudientes: p.allow_acudientes,
+    billingType: p.billing_type,
+    durationDays: p.duration_days,
   }));
 }
 

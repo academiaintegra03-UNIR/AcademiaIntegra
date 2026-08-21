@@ -1,13 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { Lock, Mail, ShieldCheck, User } from "lucide-react";
+import { CreditCard, Lock, Mail, Phone, ShieldCheck, User } from "lucide-react";
 import { startCheckoutAction } from "@/app/checkout/[planId]/actions";
+import { documentTypes } from "@/lib/data/document-types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+
+const NO_DOC_TYPE = "__none__";
 
 function IconField({
   icon: Icon,
@@ -24,6 +28,7 @@ function IconField({
 
 export function CheckoutForm({ planId }: { planId: string }) {
   const [error, setError] = React.useState<string>();
+  const [tipoDocumento, setTipoDocumento] = React.useState("");
   const [isPending, startTransition] = React.useTransition();
 
   function handleSubmit(formData: FormData) {
@@ -40,6 +45,14 @@ export function CheckoutForm({ planId }: { planId: string }) {
     });
   }
 
+  // Sin esto, React resetea los campos no controlados apenas la función
+  // termina (aunque devolvamos { error }), y el usuario pierde lo que
+  // escribió cada vez que falla una validación.
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    handleSubmit(new FormData(e.currentTarget));
+  }
+
   return (
     <div>
       <div className="mb-5 flex items-center gap-2">
@@ -50,7 +63,7 @@ export function CheckoutForm({ planId }: { planId: string }) {
         </p>
       </div>
 
-      <form action={handleSubmit} className="space-y-4">
+      <form onSubmit={onSubmit} className="space-y-4">
         <input type="hidden" name="plan_id" value={planId} />
 
         {error ? (
@@ -75,6 +88,46 @@ export function CheckoutForm({ planId }: { planId: string }) {
             required
             disabled={isPending}
           />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="checkout-telefono">Teléfono</Label>
+          <IconField
+            icon={Phone}
+            id="checkout-telefono"
+            name="telefono"
+            type="tel"
+            autoComplete="tel"
+            disabled={isPending}
+          />
+        </div>
+
+        <div className="grid grid-cols-[1fr_1.4fr] gap-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="checkout-doc-tipo">Documento</Label>
+            <input type="hidden" name="tipo_documento" value={tipoDocumento} />
+            <Select
+              value={tipoDocumento || NO_DOC_TYPE}
+              onValueChange={(next) => setTipoDocumento(next === NO_DOC_TYPE ? "" : next)}
+              disabled={isPending}
+            >
+              <SelectTrigger id="checkout-doc-tipo" className="w-full">
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={NO_DOC_TYPE}>Sin especificar</SelectItem>
+                {documentTypes.map((d) => (
+                  <SelectItem key={d.value} value={d.value}>
+                    {d.value}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="checkout-doc-numero">Número</Label>
+            <IconField icon={CreditCard} id="checkout-doc-numero" name="numero_documento" disabled={isPending} />
+          </div>
         </div>
 
         <div className="space-y-1.5">

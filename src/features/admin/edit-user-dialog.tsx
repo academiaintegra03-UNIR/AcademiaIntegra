@@ -9,6 +9,7 @@ import {
   updateUserAction,
 } from "@/app/admin/usuarios/actions";
 import { roleOptions } from "@/lib/data/roles";
+import { documentTypes } from "@/lib/data/document-types";
 import type { AdminUserRow, Colegio, EstudianteOption } from "@/lib/types/panels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const NO_COLEGIO = "__none__";
+const NO_DOC_TYPE = "__none__";
 
 export function EditUserDialog({
   user,
@@ -39,6 +41,8 @@ export function EditUserDialog({
   const [open, setOpen] = React.useState(false);
   const [role, setRole] = React.useState<string>(user.role);
   const [colegioId, setColegioId] = React.useState(user.colegioId ?? "");
+  const [tipoDocumento, setTipoDocumento] = React.useState(user.tipoDocumento ?? "");
+  const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string>();
   const [isPending, startTransition] = React.useTransition();
 
@@ -58,7 +62,23 @@ export function EditUserDialog({
       }
       toast.success("Usuario actualizado.");
       setOpen(false);
+      setPassword("");
     });
+  }
+
+  // Sin esto, React resetea los campos no controlados apenas la función
+  // termina (aunque devolvamos { error }), y el usuario pierde lo que
+  // escribió cada vez que falla una validación.
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    handleSubmit(new FormData(e.currentTarget));
+  }
+
+  function generatePassword() {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    const bytes = new Uint32Array(12);
+    crypto.getRandomValues(bytes);
+    setPassword(Array.from(bytes, (b) => chars[b % chars.length]).join(""));
   }
 
   function handleAddStudent() {
@@ -103,6 +123,8 @@ export function EditUserDialog({
         if (next) {
           setRole(user.role);
           setColegioId(user.colegioId ?? "");
+          setTipoDocumento(user.tipoDocumento ?? "");
+          setPassword("");
           setLinkedStudentIds(user.linkedStudentIds);
           setStudentToAdd("");
         }
@@ -114,7 +136,7 @@ export function EditUserDialog({
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <form action={handleSubmit}>
+        <form onSubmit={onSubmit}>
           <input type="hidden" name="id" value={user.id} />
           <DialogHeader>
             <DialogTitle>Editar usuario</DialogTitle>
@@ -136,6 +158,72 @@ export function EditUserDialog({
                 required
                 disabled={isPending}
               />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor={`edit-user-password-${user.id}`}>Nueva contraseña (opcional)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id={`edit-user-password-${user.id}`}
+                  name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  minLength={8}
+                  disabled={isPending}
+                  className="font-mono"
+                  placeholder="Déjalo vacío para no cambiarla"
+                />
+                <Button type="button" variant="outline" size="sm" disabled={isPending} onClick={generatePassword}>
+                  Generar
+                </Button>
+              </div>
+              {password ? (
+                <p className="text-xs text-muted-foreground">Compártela con el usuario por un canal seguro.</p>
+              ) : null}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor={`edit-user-telefono-${user.id}`}>Teléfono (opcional)</Label>
+              <Input
+                id={`edit-user-telefono-${user.id}`}
+                name="telefono"
+                type="tel"
+                defaultValue={user.telefono ?? ""}
+                disabled={isPending}
+              />
+            </div>
+
+            <div className="grid grid-cols-[1fr_1.4fr] gap-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor={`edit-user-doc-tipo-${user.id}`}>Tipo de documento</Label>
+                <input type="hidden" name="tipo_documento" value={tipoDocumento} />
+                <Select
+                  value={tipoDocumento || NO_DOC_TYPE}
+                  onValueChange={(next) => setTipoDocumento(next === NO_DOC_TYPE ? "" : next)}
+                  disabled={isPending}
+                >
+                  <SelectTrigger id={`edit-user-doc-tipo-${user.id}`} className="w-full">
+                    <SelectValue placeholder="Selecciona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_DOC_TYPE}>Sin especificar</SelectItem>
+                    {documentTypes.map((d) => (
+                      <SelectItem key={d.value} value={d.value}>
+                        {d.value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor={`edit-user-doc-numero-${user.id}`}>Número de documento</Label>
+                <Input
+                  id={`edit-user-doc-numero-${user.id}`}
+                  name="numero_documento"
+                  defaultValue={user.numeroDocumento ?? ""}
+                  disabled={isPending}
+                />
+              </div>
             </div>
 
             <div className="flex flex-col gap-1.5">

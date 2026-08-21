@@ -4,6 +4,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { createUserAction } from "@/app/admin/usuarios/actions";
 import { roleOptions } from "@/lib/data/roles";
+import { documentTypes } from "@/lib/data/document-types";
 import type { Colegio } from "@/lib/types/panels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,12 +29,14 @@ function generatePassword() {
 }
 
 const NO_COLEGIO = "__none__";
+const NO_DOC_TYPE = "__none__";
 
 export function CreateUserDialog({ colegios }: { colegios: Colegio[] }) {
   const [open, setOpen] = React.useState(false);
   const [role, setRole] = React.useState("");
   const [colegioId, setColegioId] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [tipoDocumento, setTipoDocumento] = React.useState("");
   const [error, setError] = React.useState<string>();
   const [isPending, startTransition] = React.useTransition();
   const formRef = React.useRef<HTMLFormElement>(null);
@@ -51,8 +54,17 @@ export function CreateUserDialog({ colegios }: { colegios: Colegio[] }) {
       setRole("");
       setColegioId("");
       setPassword("");
+      setTipoDocumento("");
       formRef.current?.reset();
     });
+  }
+
+  // Sin esto, React resetea los campos no controlados apenas la función
+  // termina (aunque devolvamos { error }), y el usuario pierde lo que
+  // escribió cada vez que falla una validación.
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    handleSubmit(new FormData(e.currentTarget));
   }
 
   return (
@@ -67,7 +79,7 @@ export function CreateUserDialog({ colegios }: { colegios: Colegio[] }) {
         <Button size="sm">+ Crear usuario</Button>
       </DialogTrigger>
       <DialogContent>
-        <form ref={formRef} action={handleSubmit}>
+        <form ref={formRef} onSubmit={onSubmit}>
           <DialogHeader>
             <DialogTitle>Crear usuario</DialogTitle>
             <DialogDescription>
@@ -90,6 +102,39 @@ export function CreateUserDialog({ colegios }: { colegios: Colegio[] }) {
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="new-user-email">Correo</Label>
               <Input id="new-user-email" name="email" type="email" required disabled={isPending} />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="new-user-telefono">Teléfono (opcional)</Label>
+              <Input id="new-user-telefono" name="telefono" type="tel" disabled={isPending} />
+            </div>
+
+            <div className="grid grid-cols-[1fr_1.4fr] gap-2">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="new-user-doc-tipo">Tipo de documento</Label>
+                <input type="hidden" name="tipo_documento" value={tipoDocumento} />
+                <Select
+                  value={tipoDocumento || NO_DOC_TYPE}
+                  onValueChange={(next) => setTipoDocumento(next === NO_DOC_TYPE ? "" : next)}
+                  disabled={isPending}
+                >
+                  <SelectTrigger id="new-user-doc-tipo" className="w-full">
+                    <SelectValue placeholder="Selecciona" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NO_DOC_TYPE}>Sin especificar</SelectItem>
+                    {documentTypes.map((d) => (
+                      <SelectItem key={d.value} value={d.value}>
+                        {d.value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="new-user-doc-numero">Número de documento</Label>
+                <Input id="new-user-doc-numero" name="numero_documento" disabled={isPending} />
+              </div>
             </div>
 
             <div className="flex flex-col gap-1.5">

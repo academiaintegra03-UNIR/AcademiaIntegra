@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { CheckCircle2, Loader2, TriangleAlert } from "lucide-react";
+import { CheckCircle2, Download, Loader2, TriangleAlert } from "lucide-react";
 import { getPaymentReceiptAction, type PaymentReceipt } from "@/app/checkout/gracias/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,6 +26,67 @@ function formatDate(iso: string) {
   });
 }
 
+/**
+ * jsPDF is only loaded when the user actually clicks "Descargar recibo" —
+ * dynamic import keeps it out of the initial page bundle.
+ */
+async function downloadReceiptPdf(receipt: PaymentReceipt) {
+  const { jsPDF } = await import("jspdf");
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+  const marginX = 56;
+  let y = 72;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor("#1e3a5f");
+  doc.text("Academia Integra", marginX, y);
+
+  y += 20;
+  doc.setFontSize(12);
+  doc.setTextColor("#6b7280");
+  doc.setFont("helvetica", "normal");
+  doc.text("Recibo de pago", marginX, y);
+
+  y += 32;
+  doc.setDrawColor("#e5e7eb");
+  doc.line(marginX, y, 539, y);
+
+  const rows: [string, string][] = [
+    ["Plan", receipt.planName],
+    ["Monto", formatCop(receipt.amountCop)],
+    ["Fecha", formatDate(receipt.createdAt)],
+    ["Referencia", receipt.reference],
+    ["Estado", "Pago confirmado"],
+  ];
+
+  y += 30;
+  for (const [label, value] of rows) {
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor("#6b7280");
+    doc.setFontSize(11);
+    doc.text(label, marginX, y);
+
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor("#111827");
+    doc.text(value, 539, y, { align: "right" });
+
+    y += 26;
+  }
+
+  y += 20;
+  doc.setDrawColor("#e5e7eb");
+  doc.line(marginX, y, 539, y);
+
+  y += 24;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor("#9ca3af");
+  doc.text("Este recibo es un comprobante generado automáticamente por Academia Integra.", marginX, y);
+
+  doc.save(`recibo-academia-integra-${receipt.reference}.pdf`);
+}
+
 function ReceiptRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between border-b border-dashed border-border py-2 text-sm last:border-none">
@@ -44,6 +105,17 @@ export function PaymentReceiptView({
 }) {
   const [receipt, setReceipt] = React.useState(initial);
   const [pollCount, setPollCount] = React.useState(0);
+  const [isDownloading, setIsDownloading] = React.useState(false);
+
+  async function handleDownload() {
+    if (!receipt) return;
+    setIsDownloading(true);
+    try {
+      await downloadReceiptPdf(receipt);
+    } finally {
+      setIsDownloading(false);
+    }
+  }
 
   React.useEffect(() => {
     if (!reference || receipt?.status !== "pending" || pollCount >= MAX_POLLS) return;
@@ -105,6 +177,20 @@ export function PaymentReceiptView({
             <ReceiptRow label="Fecha" value={formatDate(receipt.createdAt)} />
             <ReceiptRow label="Referencia" value={receipt.reference} mono />
           </div>
+
+          <Button
+            variant="outline"
+            className="mb-2.5 w-full gap-2"
+            onClick={handleDownload}
+            disabled={isDownloading}
+          >
+            {isDownloading ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Download className="size-4" aria-hidden="true" />
+            )}
+            Descargar recibo (PDF)
+          </Button>
 
           <Button asChild size="lg" className="w-full">
             <Link href="/login">Iniciar sesión</Link>

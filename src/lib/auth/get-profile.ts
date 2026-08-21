@@ -21,11 +21,13 @@ export const getAuthenticatedProfile = cache(async (): Promise<Profile | null> =
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select("id, role, nombre")
     .eq("id", user.id)
     .single();
+
+  if (error) console.error("Failed to load authenticated profile:", error);
 
   return profile;
 });

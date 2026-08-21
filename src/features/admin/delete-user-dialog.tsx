@@ -35,6 +35,11 @@ export function DeleteUserDialog({ user, disabled }: { user: AdminUserRow; disab
     });
   }
 
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    handleSubmit(new FormData(e.currentTarget));
+  }
+
   return (
     <Dialog
       open={open}
@@ -56,7 +61,7 @@ export function DeleteUserDialog({ user, disabled }: { user: AdminUserRow; disab
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <form action={handleSubmit}>
+        <form onSubmit={onSubmit}>
           <input type="hidden" name="id" value={user.id} />
           <DialogHeader>
             <DialogTitle>Eliminar usuario</DialogTitle>
