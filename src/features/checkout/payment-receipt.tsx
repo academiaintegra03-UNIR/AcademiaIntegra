@@ -4,88 +4,16 @@ import * as React from "react";
 import Link from "next/link";
 import { CheckCircle2, Download, Loader2, TriangleAlert } from "lucide-react";
 import { getPaymentReceiptAction, type PaymentReceipt } from "@/app/checkout/gracias/actions";
-import { siteName } from "@/lib/data/home-content";
+import { buildReceiptPdf, documentoCompleto, formatCop, formatReceiptDate, receiptFilename } from "@/lib/receipt-pdf";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 const POLL_INTERVAL_MS = 3000;
 const MAX_POLLS = 20; // ~1 minuto
 
-function formatCop(value: number) {
-  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 }).format(
-    value
-  );
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("es-CO", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-/**
- * jsPDF is only loaded when the user actually clicks "Descargar recibo" —
- * dynamic import keeps it out of the initial page bundle.
- */
 async function downloadReceiptPdf(receipt: PaymentReceipt) {
-  const { jsPDF } = await import("jspdf");
-  const doc = new jsPDF({ unit: "pt", format: "a4" });
-
-  const marginX = 56;
-  let y = 72;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.setTextColor("#1e3a5f");
-  doc.text(siteName, marginX, y);
-
-  y += 20;
-  doc.setFontSize(12);
-  doc.setTextColor("#6b7280");
-  doc.setFont("helvetica", "normal");
-  doc.text("Recibo de pago", marginX, y);
-
-  y += 32;
-  doc.setDrawColor("#e5e7eb");
-  doc.line(marginX, y, 539, y);
-
-  const rows: [string, string][] = [
-    ["Plan", receipt.planName],
-    ["Monto", formatCop(receipt.amountCop)],
-    ["Fecha", formatDate(receipt.createdAt)],
-    ["Referencia", receipt.reference],
-    ["Estado", "Pago confirmado"],
-  ];
-
-  y += 30;
-  for (const [label, value] of rows) {
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor("#6b7280");
-    doc.setFontSize(11);
-    doc.text(label, marginX, y);
-
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor("#111827");
-    doc.text(value, 539, y, { align: "right" });
-
-    y += 26;
-  }
-
-  y += 20;
-  doc.setDrawColor("#e5e7eb");
-  doc.line(marginX, y, 539, y);
-
-  y += 24;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor("#9ca3af");
-  doc.text(`Este recibo es un comprobante generado automáticamente por ${siteName}.`, marginX, y);
-
-  doc.save(`recibo-nova-digital-systems-${receipt.reference}.pdf`);
+  const doc = await buildReceiptPdf(receipt);
+  doc.save(receiptFilename(receipt));
 }
 
 function ReceiptRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
@@ -161,6 +89,7 @@ export function PaymentReceiptView({
   }
 
   if (receipt.status === "approved") {
+    const documento = documentoCompleto(receipt);
     return (
       <Card>
         <CardContent>
@@ -172,11 +101,29 @@ export function PaymentReceiptView({
             <p className="text-sm text-muted-foreground">Tu cuenta ya está activa.</p>
           </div>
 
-          <div className="mb-5 rounded-xl bg-muted p-4">
+          <div className="mb-4 rounded-xl bg-muted p-4">
+            <div className="mb-2 text-xs font-bold tracking-wide text-muted-foreground uppercase">
+              Facturado a
+            </div>
+            <ReceiptRow label="Nombre" value={receipt.nombre} />
+            {documento ? <ReceiptRow label="Documento" value={documento} /> : null}
+            <ReceiptRow label="Correo" value={receipt.email} />
+          </div>
+
+          <div className="mb-4 rounded-xl bg-muted p-4">
+            <div className="mb-2 text-xs font-bold tracking-wide text-muted-foreground uppercase">
+              Detalles del pago
+            </div>
             <ReceiptRow label="Plan" value={receipt.planName} />
-            <ReceiptRow label="Monto" value={formatCop(receipt.amountCop)} />
-            <ReceiptRow label="Fecha" value={formatDate(receipt.createdAt)} />
+            {receipt.planPeriod ? <ReceiptRow label="Período" value={receipt.planPeriod} /> : null}
+            <ReceiptRow label="Fecha" value={formatReceiptDate(receipt.createdAt)} />
             <ReceiptRow label="Referencia" value={receipt.reference} mono />
+            <ReceiptRow label="Método de pago" value="Wompi (Web Checkout)" />
+          </div>
+
+          <div className="mb-5 flex items-center justify-between rounded-xl bg-primary px-4 py-3.5 text-white">
+            <span className="text-sm font-bold tracking-wide uppercase">Total pagado</span>
+            <span className="text-lg font-extrabold">{formatCop(receipt.amountCop)}</span>
           </div>
 
           <Button

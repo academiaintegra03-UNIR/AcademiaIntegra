@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import { verifyWompiWebhookChecksum, type WompiEvent } from "@/lib/wompi";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { activateSubscription } from "@/lib/subscriptions";
+import { getPaymentReceiptAction } from "@/app/checkout/gracias/actions";
+import { sendReceiptEmail } from "@/lib/email/send-receipt-email";
 import type { PaymentStatus } from "@/lib/supabase/database.types";
 
 export const runtime = "nodejs";
@@ -91,6 +93,11 @@ export async function POST(request: NextRequest) {
   if (status === "approved" && payment.profile_id) {
     const { error: subError } = await activateSubscription(payment.profile_id, payment.plan_id);
     if (subError) console.error("Wompi webhook: failed to activate subscription:", subError);
+
+    // Best-effort — sendReceiptEmail never throws, así que un correo que
+    // falla no afecta la respuesta 200 que espera Wompi.
+    const receipt = await getPaymentReceiptAction(payment.reference);
+    if (receipt) await sendReceiptEmail(payment.email, receipt);
   }
 
   return NextResponse.json({ received: true });
