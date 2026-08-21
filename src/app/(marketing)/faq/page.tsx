@@ -4,7 +4,7 @@ import { allFaqs } from "@/lib/data/faqs";
 
 export const metadata: Metadata = {
   title: "Preguntas frecuentes",
-  description: "Respuestas sobre clases, diagnóstico, planes, IA responsable y matrícula en Academia Integra.",
+  description: "Respuestas sobre clases, diagnóstico, planes, IA responsable y matrícula en Nova Digital Systems.",
 };
 
 const faqJsonLd = {

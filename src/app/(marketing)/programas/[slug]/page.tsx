@@ -31,7 +31,7 @@ export default async function ProgramDetailPage({ params }: PageProps<"/programa
     "@type": "Course",
     name: program.name,
     description: program.description,
-    provider: { "@type": "EducationalOrganization", name: "Academia Integra", sameAs: siteUrl },
+    provider: { "@type": "EducationalOrganization", name: "Nova Digital Systems", sameAs: siteUrl },
   };
 
   const breadcrumbJsonLd = {

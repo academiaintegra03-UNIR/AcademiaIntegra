@@ -16,8 +16,8 @@ const description =
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Academia Integra | Matemáticas y preparación para exámenes",
-    template: "%s · Academia Integra",
+    default: "Nova Digital Systems | Matemáticas y preparación para exámenes",
+    template: "%s · Nova Digital Systems",
   },
   description,
   keywords: [
@@ -38,13 +38,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "es_CO",
-    siteName: "Academia Integra",
-    title: "Academia Integra | Matemáticas y preparación para exámenes",
+    siteName: "Nova Digital Systems",
+    title: "Nova Digital Systems | Matemáticas y preparación para exámenes",
     description,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Academia Integra | Matemáticas y preparación para exámenes",
+    title: "Nova Digital Systems | Matemáticas y preparación para exámenes",
     description,
   },
 };
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "EducationalOrganization",
-  name: "Academia Integra",
+  name: "Nova Digital Systems",
   description,
   url: siteUrl,
   logo: `${siteUrl}/Nova-PNG.png`,

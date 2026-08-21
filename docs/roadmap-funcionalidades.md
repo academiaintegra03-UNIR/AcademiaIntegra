@@ -1,4 +1,4 @@
-# Roadmap de funcionalidades — Academia Integra
+# Roadmap de funcionalidades — Nova Digital Systems
 
 Este documento reúne las funcionalidades planeadas que todavía no están
 construidas, organizadas por área, con la tecnología recomendada para cada
@@ -243,18 +243,16 @@ presupuesto.)*
   estricta, sin marca de YouTube): Cloudflare Stream o Mux — precio por uso,
   pero suman un proveedor nuevo.
 
-### 3. Dominio propio
+### 3. Dominio propio [LISTO]
 
-- Hoy el sitio vive en `academia-integra.vercel.app` (subdominio gratis de
-  Vercel); el código tiene un dominio de ejemplo (`academia-integra.example.com`)
-  solo como placeholder de SEO hasta que exista uno real.
-- **Pasos**: comprar el dominio en un registrador (Namecheap, o directo en
-  Vercel) → conectarlo en Vercel → Settings → Domains (SSL automático y
-  gratis) → actualizar `NEXT_PUBLIC_SITE_URL`.
-- Esto requiere una decisión/compra del propietario del negocio — no es
-  algo que se resuelva solo con código.
-- ⚠️ **Ya no es solo un tema de marca/SEO** — el envío de correo real
-  (punto 7, reportes automáticos) **exige** un dominio propio verificado.
+- El sitio ya tiene dominio propio: `soberanocognitivo.com`. `NEXT_PUBLIC_SITE_URL`
+  quedó actualizado en `.env.local` y todo el metadata/JSON-LD (`lib/seo.ts`)
+  se arma a partir de esa variable.
+- **Pendiente de tu parte**: conectar el dominio en Vercel → Settings →
+  Domains (si no está ya) y agregar la misma variable `NEXT_PUBLIC_SITE_URL`
+  en Vercel → Settings → Environment Variables, para que aplique en producción.
+- Esto además desbloquea el envío de correo real (punto 7, reportes
+  automáticos), que **exige** un dominio propio verificado.
   Sin dominio, no se puede activar esa funcionalidad en absoluto.
 
 ### 4. Programación de clases

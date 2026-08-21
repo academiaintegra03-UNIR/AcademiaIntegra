@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { CheckCircle2, Download, Loader2, TriangleAlert } from "lucide-react";
 import { getPaymentReceiptAction, type PaymentReceipt } from "@/app/checkout/gracias/actions";
+import { siteName } from "@/lib/data/home-content";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -40,7 +41,7 @@ async function downloadReceiptPdf(receipt: PaymentReceipt) {
   doc.setFont("helvetica", "bold");
   doc.setFontSize(18);
   doc.setTextColor("#1e3a5f");
-  doc.text("Academia Integra", marginX, y);
+  doc.text(siteName, marginX, y);
 
   y += 20;
   doc.setFontSize(12);
@@ -82,9 +83,9 @@ async function downloadReceiptPdf(receipt: PaymentReceipt) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor("#9ca3af");
-  doc.text("Este recibo es un comprobante generado automáticamente por Academia Integra.", marginX, y);
+  doc.text(`Este recibo es un comprobante generado automáticamente por ${siteName}.`, marginX, y);
 
-  doc.save(`recibo-academia-integra-${receipt.reference}.pdf`);
+  doc.save(`recibo-nova-digital-systems-${receipt.reference}.pdf`);
 }
 
 function ReceiptRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {

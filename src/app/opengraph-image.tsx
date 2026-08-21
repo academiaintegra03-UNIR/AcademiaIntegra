@@ -29,7 +29,7 @@ export default async function OpengraphImage() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={logoSrc} width={96} height={96} style={{ borderRadius: "50%" }} alt="" />
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ fontSize: 56, fontWeight: 800, color: "#ffffff" }}>Academia Integra</div>
+            <div style={{ fontSize: 56, fontWeight: 800, color: "#ffffff" }}>Nova Digital Systems</div>
             <div style={{ fontSize: 28, color: "#9FD6D2", marginTop: 4 }}>Comprende, practica y avanza</div>
           </div>
         </div>

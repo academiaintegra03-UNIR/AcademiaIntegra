@@ -1,7 +1,7 @@
-# Academia Integra — web
+# Nova Digital Systems — web
 
 Aplicación Next.js (App Router, TypeScript, Tailwind v4, shadcn/ui) para el
-sitio público y los paneles de Academia Integra.
+sitio público y los paneles de Nova Digital Systems.
 
 See the project root [`README.md`](../README.md) for full documentation:
 structure, what's simulated, what's pending integration, and where the

@@ -7,7 +7,7 @@ import { getWhatsAppDisplayNumber, getWhatsAppLink } from "@/lib/whatsapp";
 export const metadata: Metadata = { title: "Contacto" };
 
 export default function ContactPage() {
-  const whatsappLink = getWhatsAppLink("Hola, quiero más información sobre Academia Integra.");
+  const whatsappLink = getWhatsAppLink("Hola, quiero más información sobre Nova Digital Systems.");
   const whatsappDisplay = getWhatsAppDisplayNumber();
 
   return (
